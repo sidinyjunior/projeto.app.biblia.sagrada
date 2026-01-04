@@ -160,6 +160,16 @@
 
         footer { text-align: center; padding: 20px; width: 100%; color: #7f8c8d; font-size: 0.8rem; }
 
+
+        /* Cores do Marca-texto */
+        .mark-yellow { background-color: rgba(241, 196, 15, 0.5) !important; color: #000 !important; border-radius: 4px; }
+        .mark-green { background-color: rgba(46, 204, 113, 0.5) !important; color: #000 !important; border-radius: 4px; }
+        .mark-blue { background-color: rgba(52, 152, 219, 0.5) !important; color: #000 !important; border-radius: 4px; }
+
+        /* Botões de cores no modal */
+       .color-options { display: flex; gap: 10px; margin-top: 15px; justify-content: center; border-top: 1px solid #eee; padding-top: 15px; }
+       .color-dot { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; }
+
     </style>
 
 </head>
@@ -269,8 +279,24 @@
         <div id="reader-footer-ctrl" class="reader-footer"></div>
 
     </div>
+    
 
+    <div id="compare-modal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        <strong id="compare-ref" style="color: var(--verde-escuro);">João 3:16</strong>
+        <button onclick="compartilharVersiculo()" style="background:var(--azul-link); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem;">COMPARTILHAR 🚀</button>
+        <button onclick="fecharComparacao()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color: #999;">✕</button>
+    </div>
+    
+    <div id="compare-list"></div>
 
+    <div class="color-options">
+        <div class="color-dot" style="background:#f1c40f;" onclick="marcarVersiculo('yellow')"></div>
+        <div class="color-dot" style="background:#2ecc71;" onclick="marcarVersiculo('green')"></div>
+        <div class="color-dot" style="background:#3498db;" onclick="marcarVersiculo('blue')"></div>
+        <div class="color-dot" style="background:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem;" onclick="marcarVersiculo('none')">🚫</div>
+    </div>
+</div>
 
     <footer>
 
@@ -587,7 +613,16 @@
 
             const cont = document.getElementById('reader-text');
 
-            cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando escrituras...</p>";
+            // Substitua o mapa antigo por este inteligente:
+cont.innerHTML = versos.map((v, i) => {
+    // Busca se este versículo específico tem cor salva
+    const corSalva = localStorage.getItem(`mark_${contexto.livro}_${contexto.cap}_${i}`);
+    const classeCor = corSalva ? `mark-${corSalva}` : '';
+    
+    return `<div class="verse-row ${classeCor}" onclick="compararVerso(${i})">
+                <span class="verse-num">${i+1}</span>${v}
+            </div>`;
+}).join('');
 
             try {
 
@@ -700,6 +735,7 @@
 
 
         async function compararVerso(idx) {
+            versoSelecionadoIdx = idx;
 
             document.getElementById('confirm-overlay').style.display = 'block';
 
@@ -827,6 +863,39 @@ function pararVoz() {
 
 
         window.onload = () => { renderBiblia(); };
+
+                // VARIÁVEL GLOBAL (Coloque no topo ou antes das funções novas)
+let versoSelecionadoIdx = null;
+
+function compartilharVersiculo() {
+    const ref = document.getElementById('compare-ref').innerText;
+    // Pega o texto da primeira versão que aparecer na lista
+    const primeiroP = document.getElementById('compare-list').querySelector('p');
+    if (!primeiroP) return;
+    
+    const texto = primeiroP.innerText;
+    const mensagem = `📖 ${ref}\n\n"${texto}"\n\nEnviado pelo App Bíblia Sagrada`;
+
+    if (navigator.share) {
+        navigator.share({ title: ref, text: mensagem });
+    } else {
+        navigator.clipboard.writeText(mensagem);
+        alert("Texto copiado!");
+    }
+}
+
+function marcarVersiculo(cor) {
+    const chave = `mark_${contexto.livro}_${contexto.cap}_${versoSelecionadoIdx}`;
+    
+    if (cor === 'none') {
+        localStorage.removeItem(chave);
+    } else {
+        localStorage.setItem(chave, cor);
+    }
+    
+    fecharComparacao();
+    carregarTexto(); // Isso faz a cor aparecer na hora na tela
+}
 
         // --- CÓDIGO DE REGISTRO DO SERVICE WORKER E LIMPEZA DE CACHE ---
         if ('serviceWorker' in navigator) {
