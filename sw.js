@@ -1,4 +1,4 @@
-const CACHE_NAME = 'projeto-app-biblia-v12'; // Mude para v4, v5 sempre que atualizar
+const CACHE_NAME = 'projeto-app-biblia-v13'; // Mude para v4, v5 sempre que atualizar
 const ASSETS = [
   './',
   './index.html',
