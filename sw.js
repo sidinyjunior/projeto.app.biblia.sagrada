@@ -1,4 +1,4 @@
-const CACHE_NAME = 'projeto-app-biblia-v2';
+const CACHE_NAME = 'projeto-app-biblia-v3';
 const ASSETS = [
   '/',
   '/index.html',
