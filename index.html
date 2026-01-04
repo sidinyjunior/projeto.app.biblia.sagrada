@@ -115,25 +115,36 @@
             display: none; border: 1px dashed var(--primary);
         }
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
-        .local-search-item b { color: var(--amarelo); }  
+        .local-search-item b { color: var(--amarelo); }
 
-        /* Botão da Lupa dentro do campo de pesquisa */
-        .search-btn-lupa {
+
+        /* Botões Neutros da Barra de Busca (Lupa e Limpar) */
+        .search-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .btn-search-neutral {
             background: none;
             border: none;
-            font-size: 1.2rem;
             cursor: pointer;
             padding: 5px;
-            color: #999;
-            transition: 0.3s;
+            color: #333; /* Cor neutra grafite escuro */
+            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .search-btn-lupa:active {
-            transform: scale(1.2);
-            color: var(--primary);
+        .btn-search-neutral:active {
+            transform: scale(1.1);
         }
+        .btn-limpar {
+            font-size: 1.1rem;
+            color: #999;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
     </style>
 </head>
 <body>
@@ -163,9 +174,15 @@
 
     <div class="container">
         <div class="search-container">
-    <input type="text" id="bibliaSearch" placeholder="Pesquisar Livro ou Bíblia..." onkeyup="filtrarLivros()">
-    <button class="search-btn-lupa" onclick="executarBuscaGlobal(document.getElementById('bibliaSearch').value)">🔍</button>
+    <input type="text" id="bibliaSearch" placeholder="Pesquisar..." onkeyup="filtrarLivros()">
+    <div class="search-actions">
+        <button class="btn-search-neutral btn-limpar" onclick="limparBuscaPrincipal()">✕</button>
+        <button class="btn-search-neutral" onclick="executarBuscaGlobal(document.getElementById('bibliaSearch').value)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+    </div>
 </div>
+      
 
         <div class="biblia-box">
             <div class="testamento-selector">
@@ -585,6 +602,19 @@
                 } else { container.style.display = "block"; container.innerHTML = "<div style='padding:10px;'>Nada encontrado.</div>"; }
             } catch (e) { console.error(e); }
         }
+
+       
+        function limparBuscaPrincipal() {
+            const input = document.getElementById('bibliaSearch');
+            input.value = ''; // Apaga o que foi digitado
+            filtrarLivros();  // Volta a mostrar todos os livros na lista
+            input.focus();    // Deixa o cursor piscando no campo pronto para digitar de novo
+        }
+
     </script>
 </body>
 </html>
+
+
+        
+  
