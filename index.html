@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- VERSAO 13.0 -->
     <title>Projeto App Bíblia Sagrada</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -99,6 +100,28 @@
     .search-txt { font-size: 0.95rem; line-height: 1.4; color: #ccc; }
    .search-txt b { color: #fff; background: rgba(242, 147, 37, 0.4); padding: 0 2px; }
     .search-count { padding: 10px; text-align: center; font-size: 0.8rem; color: #888; border-bottom: 1px solid #333; }
+
+      /* Busca Local dentro do Grid de Capítulos */
+        .local-search-results {
+            grid-column: span 5;
+            background: rgba(242, 147, 37, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            border: 1px dashed var(--primary);
+        }
+        .local-search-item {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            font-size: 0.85rem;
+            color: #ccc;
+            cursor: pointer;
+            text-align: left;
+        }
+        .local-search-item b { color: var(--amarelo); }  
         
     </style>
 </head>
@@ -292,7 +315,14 @@
                 grid.innerHTML = "";
                 const innerSearch = document.createElement('div');
                 innerSearch.className = 'inner-search-container';
-                innerSearch.innerHTML = `<input type="text" class="inner-search-input" placeholder="Capítulo em ${livro}..." oninput="filtrarCapitulos(this)">`;
+                innerSearch.innerHTML = `
+                    <input type="text" class="inner-search-input" 
+                           placeholder="Buscar em ${livro}..." 
+                           onkeyup="executarBuscaLocal(this, '${livro}')">
+                    <div class="local-search-results" id="local-results-${livro}"></div>
+                `;
+
+                
                 grid.appendChild(innerSearch);
 
                 for (let i = 1; i <= total; i++) {
@@ -593,6 +623,48 @@ function irParaVersiculo(livro, cap) {
     fecharBusca();
     abrirLeitor(livro, cap);
 }
+
+async function executarBuscaLocal(input, nomeLivro) {
+    const termo = input.value.trim();
+    const termoLimpo = limparTexto(termo);
+    const container = input.nextElementSibling; // div .local-search-results
+
+    if (termoLimpo.length < 3) {
+        container.style.display = "none";
+        return;
+    }
+
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(nomeLivro));
+        const capitulos = lData.chapters || lData.capitulos;
+        
+        let encontrados = [];
+        capitulos.forEach((versos, cIdx) => {
+            versos.forEach((vTexto, vIdx) => {
+                if (limparTexto(vTexto).includes(termoLimpo)) {
+                    encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
+                }
+            });
+        });
+
+        if (encontrados.length > 0) {
+            container.style.display = "block";
+            const regex = new RegExp(`(${termo})`, 'gi');
+            container.innerHTML = encontrados.map(e => `
+                <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
+                    <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - 
+                    ${e.texto.replace(regex, "<b>$1</b>")}
+                </div>
+            `).join('');
+        } else {
+            container.style.display = "block";
+            container.innerHTML = "<div style='padding:10px; font-size:0.8rem;'>Nada encontrado neste livro.</div>";
+        }
+    } catch (e) { console.error("Erro na busca local:", e); }
+}
+        
     </script>
 </body>
 </html>
