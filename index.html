@@ -432,7 +432,8 @@
 
         let sintetizador = window.speechSynthesis;
 
-        let lendoAgora = false;
+        let statusVoz = 'parado'; // Pode ser: 'parado', 'lendo', 'pausado'
+        let ut = null; // Vamos manter a referência global para a fala
 
 
 
@@ -761,32 +762,51 @@
         }
 
 
+function alternarVoz() {
+    const btn = document.getElementById('btn-voz');
 
-        function alternarVoz() {
+    // 1. Se estiver lendo agora, PAUSA
+    if (statusVoz === 'lendo') {
+        sintetizador.pause();
+        statusVoz = 'pausado';
+        btn.innerText = "▶️"; // Volta ícone de play enquanto pausado
+        return;
+    }
 
-            if (lendoAgora) { pararVoz(); } 
+    // 2. Se estiver pausado, RETOMA
+    if (statusVoz === 'pausado') {
+        sintetizador.resume();
+        statusVoz = 'lendo';
+        btn.innerText = "⏸️"; // Ícone de pause enquanto fala
+        return;
+    }
 
-            else {
+    // 3. Se estiver parado, INICIA do zero
+    if (statusVoz === 'parado') {
+        let texto = document.getElementById('reader-text').innerText.replace(/[0-9]/g, '');
+        ut = new SpeechSynthesisUtterance(texto);
+        ut.lang = 'pt-BR';
+        
+        ut.onstart = () => { 
+            statusVoz = 'lendo'; 
+            btn.innerText = "⏸️"; 
+        };
+        
+        ut.onend = () => {
+            pararVoz(); // Limpa tudo quando terminar naturalmente
+        };
 
-                let texto = document.getElementById('reader-text').innerText.replace(/[0-9]/g, '');
+        sintetizador.speak(ut);
+    }
+}
 
-                let ut = new SpeechSynthesisUtterance(texto);
-
-                ut.lang = 'pt-BR';
-
-                ut.onstart = () => { lendoAgora = true; document.getElementById('btn-voz').innerText = "⏹️"; };
-
-                ut.onend = () => pararVoz();
-
-                sintetizador.speak(ut);
-
-            }
-
-        }
-
-        function pararVoz() { sintetizador.cancel(); lendoAgora = false; document.getElementById('btn-voz').innerText = "▶️"; }
-
-
+function pararVoz() {
+    sintetizador.cancel();
+    statusVoz = 'parado';
+    const btn = document.getElementById('btn-voz');
+    if (btn) btn.innerText = "▶️";
+}
+        
 
         function switchTestamento(t) {
 
