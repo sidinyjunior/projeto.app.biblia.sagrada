@@ -32,57 +32,29 @@
         .header img { width: 120px; border-radius: 20px; }
         .container { width: 95%; max-width: 500px; flex: 1; display: flex; flex-direction: column; }
 
-        /* BUSCA PRINCIPAL */
         .search-container { background:#fff; border-radius:25px; margin-bottom:20px; padding:5px 15px; display:flex; align-items:center; }
         #bibliaSearch { flex:1; border:none; padding:10px; outline:none; color:#000; font-size: 1rem; }
 
-        /* BOX PRINCIPAL */
         .biblia-box { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        /* TESTAMENTO SELECTOR - AJUSTADO PARA LINHA ÚNICA SEM QUEBRA */
-        .testamento-selector { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 25px; 
-            width: 100%;
-        }
-        
+        .testamento-selector { display: flex; gap: 10px; margin-bottom: 25px; width: 100%; }
         .btn-testamento { 
-            flex: 1; 
-            padding: 15px 5px; 
-            border: none; 
-            cursor: pointer; 
-            border-radius: 12px; 
-            transition: 0.3s; 
-            opacity: 0.5; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Montserrat', sans-serif;
-            white-space: nowrap; /* Impede a quebra de linha */
-            overflow: hidden;
-            /* Fonte dinâmica: diminui conforme a largura da tela */
-            font-size: clamp(0.7rem, 3vw, 0.95rem); 
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: -0.2px;
+            flex: 1; padding: 15px 5px; border: none; cursor: pointer; border-radius: 12px; transition: 0.3s; opacity: 0.5; 
+            display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif;
+            white-space: nowrap; overflow: hidden; font-size: clamp(0.7rem, 3vw, 0.95rem); 
+            font-weight: 800; text-transform: uppercase; letter-spacing: -0.2px;
         }
-        
         .btn-vt { background-color: var(--vt-color); color: #000080; }
         .btn-nt { background-color: var(--nt-color); color: #000080; }
         .btn-testamento.active { opacity: 1; transform: scale(1.02); }
 
-        /* LISTAGEM E GRID */
         .subtitulo-elegante { font-family: 'Great Vibes', cursive; font-size: 2.2rem; margin: 25px 0 10px 0; text-align: center; width: 100%; }
         .btn-livro { width: 100%; padding: 16px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 8px; text-align: center; }
-        
         .capitulos-grid { display: none; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 15px; }
         .btn-cap { padding: 12px 0; background: #333; color: white; border: 1px solid #444; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; }
-        
         .inner-search-container { display: flex; background: #fff; border-radius: 20px; margin-bottom: 15px; padding: 5px 12px; align-items: center; width: 100%; box-sizing: border-box; grid-column: span 5; }
         .inner-search-input { flex: 1; border: none; padding: 8px; font-size: 0.9rem; outline: none; background: transparent; color: #000; }
 
-        /* LEITOR OVERLAY */
         #reader-overlay { position: fixed; inset: 0; background: var(--bg-leitor); z-index: 5000; display: none; flex-direction: column; color: var(--texto-leitor); }
         .theme-sepia { --bg-leitor: #f4ecd8 !important; --texto-leitor: #5b4636 !important; }
         .theme-dark { --bg-leitor: #1a1a1a !important; --texto-leitor: #e0e0e0 !important; }
@@ -109,6 +81,14 @@
 
     <div id="confirm-overlay" onclick="fecharComparacao()"></div>
 
+    <div id="compare-modal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <strong id="compare-ref" style="color: var(--verde-escuro);">João 3:16</strong>
+            <button onclick="fecharComparacao()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color: #999;">✕</button>
+        </div>
+        <div id="compare-list"></div>
+    </div>
+
     <div class="header">
         <img src="assets/icone_leao_biblia_app.png" alt="Logo">
     </div>
@@ -120,15 +100,33 @@
 
         <div class="biblia-box">
             <div class="testamento-selector">
-                <button id="tab-vt" class="btn-testamento btn-vt active" onclick="switchTestamento('vt')">
-                    Velho Testamento
-                </button>
-                <button id="tab-nt" class="btn-testamento btn-nt" onclick="switchTestamento('nt')">
-                    Novo Testamento
-                </button>
+                <button id="tab-vt" class="btn-testamento btn-vt active" onclick="switchTestamento('vt')">Velho Testamento</button>
+                <button id="tab-nt" class="btn-testamento btn-nt" onclick="switchTestamento('nt')">Novo Testamento</button>
             </div>
             <div id="lista-livros"></div>
         </div>
+    </div>
+
+    <div id="reader-overlay">
+        <div class="reader-header">
+            <span id="reader-title" style="font-weight:bold;">Gênesis 1</span>
+            <button onclick="fecharLeitor()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">✕</button>
+        </div>
+        <div class="reader-toolbar">
+            <select id="select-versao" onchange="trocarVersao(this.value)" style="background:white; border:none; border-radius:5px; padding:5px;">
+                <option value="acf">ACF</option>
+                <option value="nvi">NVI</option>
+                <option value="kja">KJA</option>
+                <option value="kjv">KJV</option>
+            </select>
+            <button id="btn-voz" onclick="alternarVoz()" style="background:var(--amarelo); border:none; border-radius:5px; padding:8px 12px; cursor:pointer;">▶️</button>
+            <button onclick="mudarFonte(0.1)" style="background:var(--verde-escuro); color:white; border:none; border-radius:5px; padding:8px 12px; cursor:pointer;">A+</button>
+            <button onclick="mudarFonte(-0.1)" style="background:var(--verde-escuro); color:white; border:none; border-radius:5px; padding:8px 12px; cursor:pointer;">A-</button>
+            <button onclick="setTema('sepia')" style="background:#f4ecd8; border:none; border-radius:5px; padding:8px; color:#5b4636; cursor:pointer;">S</button>
+            <button onclick="setTema('dark')" style="background:#1a1a1a; color:white; border:none; border-radius:5px; padding:8px; cursor:pointer;">N</button>
+        </div>
+        <div id="reader-text" class="reader-content"></div>
+        <div id="reader-footer-ctrl" class="reader-footer"></div>
     </div>
 
     <footer>
@@ -211,6 +209,7 @@
         const BIBLE_CACHE = {};
         let fontSize = 1.2;
         let sintetizador = window.speechSynthesis;
+        let lendoAgora = false;
 
         function renderBiblia(filtro = "") {
             const container = document.getElementById('lista-livros');
@@ -268,9 +267,11 @@
             caps.forEach(c => c.style.display = (val === "" || c.innerText.startsWith(val)) ? "block" : "none");
         }
 
+        // FUNÇÃO DE BUSCA ATUALIZADA COM O ENDEREÇO OFICIAL
         async function fetchBibleData(versao) {
             if (BIBLE_CACHE[versao]) return BIBLE_CACHE[versao];
-            const res = await fetch(`${versao}.json`);
+            const url = `https://raw.githubusercontent.com/sidinyjunior/projeto.app.biblia.sagrada/main/${versao}.json`;
+            const res = await fetch(url);
             const data = await res.json();
             BIBLE_CACHE[versao] = data;
             return data;
@@ -282,13 +283,21 @@
             carregarTexto();
         }
 
+        const limparTexto = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
         async function carregarTexto() {
             const cont = document.getElementById('reader-text');
-            cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando...</p>";
+            cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando escrituras...</p>";
             try {
                 const data = await fetchBibleData(contexto.versao);
-                const livros = Array.isArray(data) ? data : (data.livros || data.capitulos);
-                const lData = livros.find(l => (l.nome || l.name).toLowerCase() === contexto.livro.toLowerCase());
+                let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+                
+                const lData = listaLivros.find(l => {
+                    const nomeNoArquivo = limparTexto(l.nome || l.name || "");
+                    const nomeBuscado = limparTexto(contexto.livro);
+                    return nomeNoArquivo === nomeBuscado;
+                });
+
                 const capítulos = lData.chapters || lData.capitulos;
                 const versos = capítulos[contexto.cap - 1];
                 
@@ -313,7 +322,7 @@
 
             const btnOk = document.createElement('button');
             btnOk.className = "btn-nav-leitor btn-expand";
-            btnOk.innerText = "FINALIZAR E FECHAR";
+            btnOk.innerText = "FECHAR LEITOR";
             btnOk.onclick = fecharLeitor;
             footer.appendChild(btnOk);
 
@@ -339,11 +348,11 @@
             document.getElementById('compare-modal').style.display = 'block';
             document.getElementById('compare-ref').innerText = `${contexto.livro} ${contexto.cap}:${idx+1}`;
             let html = "";
-            for(let v of ['acf', 'nvi', 'kja']) {
+            for(let v of ['acf', 'nvi', 'kja', 'kjv']) {
                 try {
                     const data = await fetchBibleData(v);
-                    const livros = Array.isArray(data) ? data : (data.livros || data.capitulos);
-                    const lData = livros.find(l => (l.nome || l.name).toLowerCase() === contexto.livro.toLowerCase());
+                    let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+                    const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(contexto.livro));
                     const txt = (lData.chapters || lData.capitulos)[contexto.cap-1][idx];
                     html += `<div class="compare-item"><span class="compare-label">${v.toUpperCase()}</span><p>${txt}</p></div>`;
                 } catch(e){}
@@ -356,7 +365,7 @@
             document.getElementById('compare-modal').style.display = 'none';
         }
 
-        function fecharLeitor() { document.getElementById('reader-overlay').style.display = 'none'; sintetizador.cancel(); }
+        function fecharLeitor() { document.getElementById('reader-overlay').style.display = 'none'; pararVoz(); }
         function trocarVersao(v) { contexto.versao = v; carregarTexto(); }
         function mudarFonte(d) { fontSize += d; document.getElementById('reader-text').style.fontSize = fontSize + "rem"; }
         function setTema(t) { 
@@ -366,15 +375,17 @@
         }
 
         function alternarVoz() {
-            if(sintetizador.speaking) { sintetizador.cancel(); document.getElementById('btn-voz').innerText = "▶️"; }
+            if (lendoAgora) { pararVoz(); } 
             else {
-                const texto = document.getElementById('reader-text').innerText.replace(/[0-9]/g, '');
-                const ut = new SpeechSynthesisUtterance(texto);
-                ut.lang = 'pt-BR'; ut.onend = () => document.getElementById('btn-voz').innerText = "▶️";
-                document.getElementById('btn-voz').innerText = "⏹️";
+                let texto = document.getElementById('reader-text').innerText.replace(/[0-9]/g, '');
+                let ut = new SpeechSynthesisUtterance(texto);
+                ut.lang = 'pt-BR';
+                ut.onstart = () => { lendoAgora = true; document.getElementById('btn-voz').innerText = "⏹️"; };
+                ut.onend = () => pararVoz();
                 sintetizador.speak(ut);
             }
         }
+        function pararVoz() { sintetizador.cancel(); lendoAgora = false; document.getElementById('btn-voz').innerText = "▶️"; }
 
         function switchTestamento(t) {
             testamentoAtual = t;
@@ -385,16 +396,12 @@
 
         function filtrarLivros() { renderBiblia(document.getElementById('bibliaSearch').value); }
 
-        window.onload = () => { renderBiblia(); };
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker registrado!', reg))
-      .catch(err => console.error('Falha ao registrar Service Worker:', err));
-  });
-}
-      
+        window.onload = () => { 
+            renderBiblia(); 
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(reg => console.log('SW OK')).catch(err => console.log('SW Erro', err));
+            }
+        };
     </script>
 </body>
 </html>
