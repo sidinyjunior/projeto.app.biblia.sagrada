@@ -116,6 +116,24 @@
         }
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }  
+
+        /* Botão da Lupa dentro do campo de pesquisa */
+        .search-btn-lupa {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            color: #999;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-btn-lupa:active {
+            transform: scale(1.2);
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -145,8 +163,9 @@
 
     <div class="container">
         <div class="search-container">
-            <input type="text" id="bibliaSearch" placeholder="Pesquisar Livro..." onkeyup="filtrarLivros()">
-        </div>
+    <input type="text" id="bibliaSearch" placeholder="Pesquisar Livro ou Bíblia..." onkeyup="filtrarLivros()">
+    <button class="search-btn-lupa" onclick="executarBuscaGlobal(document.getElementById('bibliaSearch').value)">🔍</button>
+</div>
 
         <div class="biblia-box">
             <div class="testamento-selector">
