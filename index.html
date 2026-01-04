@@ -1,1 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bíblia Sagrada - Plano Bienal</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icone_leao_biblia_app.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #F29325;
+            --bg: #000000;
+            --card-bg: rgba(26, 26, 26, 0.9);
+            --vt-color: #fbd751;
+            --nt-color: #F29325;
+            --verde-sucesso: #2ecc71;
+            --amarelo: #f1c40f;
+            --verde-escuro: #1a4731;
+            --azul-link: #3498db;
+            --bg-leitor: #ffffff;
+            --texto-leitor: #2d3436;
+        }
 
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .header { text-align: center; padding: 15px 0; width: 100%; }
+        .header img { width: 120px; border-radius: 20px; }
+        .container { width: 95%; max-width: 500px; flex: 1; display: flex; flex-direction: column; }
+
+        /* BUSCA PRINCIPAL */
+        .search-container { background:#fff; border-radius:25px; margin-bottom:20px; padding:5px 15px; display:flex; align-items:center; }
+        #bibliaSearch { flex:1; border:none; padding:10px; outline:none; color:#000; font-size: 1rem; }
+
+        /* BOX PRINCIPAL */
+        .biblia-box { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* TESTAMENTO SELECTOR - AJUSTADO PARA LINHA ÚNICA SEM QUEBRA */
+        .testamento-selector { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            width: 100%;
+        }
+        
+        .btn-testamento { 
+            flex: 1; 
+            padding: 15px 5px; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 12px; 
+            transition: 0.3s; 
+            opacity: 0.5; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            white-space: nowrap; /* Impede a quebra de linha */
+            overflow: hidden;
+            /* Fonte dinâmica: diminui conforme a largura da tela */
+            font-size: clamp(0.7rem, 3vw, 0.95rem); 
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.2px;
+        }
+        
+        .btn-vt { background-color: var(--vt-color); color: #000080; }
+        .btn-nt { background-color: var(--nt-color); color: #000080; }
+        .btn-testamento.active { opacity: 1; transform: scale(1.02); }
+
+        /* LISTAGEM E GRID */
+        .subtitulo-elegante { font-family: 'Great Vibes', cursive; font-size: 2.2rem; margin: 25px 0 10px 0; text-align: center; width: 100%; }
+        .btn-livro { width: 100%; padding: 16px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 8px; text-align: center; }
+        
+        .capitulos-grid { display: none; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 15px; }
+        .btn-cap { padding: 12px 0; background: #333; color: white; border: 1px solid #444; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; }
+        
+        .inner-search-container { display: flex; background: #fff; border-radius: 20px; margin-bottom: 15px; padding: 5px 12px; align-items: center; width: 100%; box-sizing: border-box; grid-column: span 5; }
+        .inner-search-input { flex: 1; border: none; padding: 8px; font-size: 0.9rem; outline: none; background: transparent; color: #000; }
+
+        /* LEITOR OVERLAY */
+        #reader-overlay { position: fixed; inset: 0; background: var(--bg-leitor); z-index: 5000; display: none; flex-direction: column; color: var(--texto-leitor); }
+        .theme-sepia { --bg-leitor: #f4ecd8 !important; --texto-leitor: #5b4636 !important; }
+        .theme-dark { --bg-leitor: #1a1a1a !important; --texto-leitor: #e0e0e0 !important; }
+        .reader-header { padding: 10px 15px; background: var(--verde-escuro); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .reader-toolbar { display: flex; background: #245e41; padding: 8px 15px; gap: 10px; align-items: center; overflow-x: auto; }
+        .reader-content { flex: 1; overflow-y: auto; padding: 20px; line-height: 1.8; }
+        .verse-row { margin-bottom: 12px; display: block; cursor: pointer; }
+        .verse-num { font-weight: bold; color: var(--nt-color); margin-right: 10px; font-size: 0.8em; }
+
+        .reader-footer { padding: 15px; display: flex; gap: 8px; background: #f9f9f9; border-top: 1px solid #ddd; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .btn-nav-leitor { padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
+        .btn-expand { flex: 2; background: var(--verde-sucesso); color: white; }
+        .btn-side { flex: 0.6; background: #eee; color: #333; }
+
+        #confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; }
+        #compare-modal { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 7000; padding: 20px; border-radius: 20px 20px 0 0; color: #333; max-height: 60vh; overflow-y: auto; }
+        .compare-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .compare-label { font-weight: bold; color: var(--verde-escuro); font-size: 0.8rem; text-transform: uppercase; }
+
+        footer { text-align: center; padding: 20px; width: 100%; color: #7f8c8d; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div id="confirm-overlay" onclick="fecharComparacao()"></div>
+
+    <div class="header">
+        <img src="assets/icone_leao_biblia_app.png" alt="Logo">
+    </div>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="bibliaSearch" placeholder="Pesquisar Livro..." onkeyup="filtrarLivros()">
+        </div>
+
+        <div class="biblia-box">
+            <div class="testamento-selector">
+                <button id="tab-vt" class="btn-testamento btn-vt active" onclick="switchTestamento('vt')">
+                    Velho Testamento
+                </button>
+                <button id="tab-nt" class="btn-testamento btn-nt" onclick="switchTestamento('nt')">
+                    Novo Testamento
+                </button>
+            </div>
+            <div id="lista-livros"></div>
+        </div>
+    </div>
+
+    <footer>
+        Criado e Desenvolvido por <b>Sidiny Junior</b><br>
+        Copyright © 2026 - Todos os Direitos Reservados
+    </footer>
+
+    <script>
+        const BIBLE_DATA = [
+            {n: "Gênesis", c: 50, cat: "Pentateuco", t: "vt", col: "#d35400"},
+            {n: "Êxodo", c: 40, cat: "Pentateuco", t: "vt", col: "#d35400"},
+            {n: "Levítico", c: 27, cat: "Pentateuco", t: "vt", col: "#d35400"},
+            {n: "Números", c: 36, cat: "Pentateuco", t: "vt", col: "#d35400"},
+            {n: "Deuteronômio", c: 34, cat: "Pentateuco", t: "vt", col: "#d35400"},
+            {n: "Josué", c: 24, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "Juízes", c: 21, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "Rute", c: 4, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "1 Samuel", c: 31, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "2 Samuel", c: 24, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "1 Reis", c: 22, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "2 Reis", c: 25, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "1 Crônicas", c: 29, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "2 Crônicas", c: 36, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "Esdras", c: 10, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "Neemias", c: 13, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "Ester", c: 10, cat: "Históricos", t: "vt", col: "#2980b9"},
+            {n: "Jó", c: 42, cat: "Poéticos", t: "vt", col: "#8e44ad"},
+            {n: "Salmos", c: 150, cat: "Poéticos", t: "vt", col: "#8e44ad"},
+            {n: "Provérbios", c: 31, cat: "Poéticos", t: "vt", col: "#8e44ad"},
+            {n: "Eclesiastes", c: 12, cat: "Poéticos", t: "vt", col: "#8e44ad"},
+            {n: "Cantares", c: 8, cat: "Poéticos", t: "vt", col: "#8e44ad"},
+            {n: "Isaías", c: 66, cat: "Profetas Maiores", t: "vt", col: "#27ae60"},
+            {n: "Jeremias", c: 52, cat: "Profetas Maiores", t: "vt", col: "#27ae60"},
+            {n: "Lamentações", c: 5, cat: "Profetas Maiores", t: "vt", col: "#27ae60"},
+            {n: "Ezequiel", c: 48, cat: "Profetas Maiores", t: "vt", col: "#27ae60"},
+            {n: "Daniel", c: 12, cat: "Profetas Maiores", t: "vt", col: "#27ae60"},
+            {n: "Oseias", c: 14, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Joel", c: 3, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Amós", c: 9, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Obadias", c: 1, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Jonas", c: 4, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Miqueias", c: 7, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Naum", c: 3, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Habacuque", c: 3, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Sofonias", c: 3, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Ageu", c: 2, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Zacarias", c: 14, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Malaquias", c: 4, cat: "Profetas Menores", t: "vt", col: "#16a085"},
+            {n: "Mateus", c: 28, cat: "Evangelhos", t: "nt", col: "#c0392b"},
+            {n: "Marcos", c: 16, cat: "Evangelhos", t: "nt", col: "#c0392b"},
+            {n: "Lucas", c: 24, cat: "Evangelhos", t: "nt", col: "#c0392b"},
+            {n: "João", c: 21, cat: "Evangelhos", t: "nt", col: "#c0392b"},
+            {n: "Atos", c: 28, cat: "Histórico NT", t: "nt", col: "#2980b9"},
+            {n: "Romanos", c: 16, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "1 Coríntios", c: 16, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "2 Coríntios", c: 13, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Gálatas", c: 6, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Efésios", c: 6, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Filipenses", c: 4, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Colossenses", c: 4, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "1 Tessalonicenses", c: 5, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "2 Tessalonicenses", c: 3, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "1 Timóteo", c: 6, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "2 Timóteo", c: 4, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Tito", c: 3, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Filemom", c: 1, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Hebreus", c: 13, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Tiago", c: 5, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "1 Pedro", c: 5, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "2 Pedro", c: 3, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "1 João", c: 5, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "2 João", c: 1, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "3 João", c: 1, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Judas", c: 1, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
+            {n: "Apocalipse", c: 22, cat: "Revelação", t: "nt", col: "#FFAE00"}
+        ];
+
+        let testamentoAtual = 'vt';
+        let contexto = { livro: "", cap: 1, versao: "acf" };
+        const BIBLE_CACHE = {};
+        let fontSize = 1.2;
+        let sintetizador = window.speechSynthesis;
+
+        function renderBiblia(filtro = "") {
+            const container = document.getElementById('lista-livros');
+            container.innerHTML = "";
+            let ultimaCat = "";
+            const filtrados = BIBLE_DATA.filter(l => l.t === testamentoAtual && l.n.toLowerCase().includes(filtro.toLowerCase()));
+            
+            filtrados.forEach(book => {
+                if (book.cat !== ultimaCat && filtro === "") {
+                    ultimaCat = book.cat;
+                    const h = document.createElement('div');
+                    h.className = "subtitulo-elegante";
+                    h.style.color = book.col;
+                    h.innerText = book.cat;
+                    container.appendChild(h);
+                }
+                const btn = document.createElement('button');
+                btn.className = "btn-livro";
+                btn.style.backgroundColor = book.col;
+                btn.innerText = book.n;
+                btn.onclick = function() { toggleCapitulos(book.n, book.c, this); };
+                const grid = document.createElement('div');
+                grid.className = "capitulos-grid";
+                container.appendChild(btn);
+                container.appendChild(grid);
+            });
+        }
+
+        function toggleCapitulos(livro, total, btn) {
+            const grid = btn.nextElementSibling;
+            const isVisible = grid.style.display === "grid";
+            document.querySelectorAll('.capitulos-grid').forEach(g => g.style.display = 'none');
+            
+            if (!isVisible) {
+                grid.innerHTML = "";
+                const innerSearch = document.createElement('div');
+                innerSearch.className = 'inner-search-container';
+                innerSearch.innerHTML = `<input type="text" class="inner-search-input" placeholder="Capítulo em ${livro}..." oninput="filtrarCapitulos(this)">`;
+                grid.appendChild(innerSearch);
+
+                for (let i = 1; i <= total; i++) {
+                    const btnCap = document.createElement('div');
+                    btnCap.className = 'btn-cap';
+                    btnCap.innerText = i;
+                    btnCap.onclick = () => abrirLeitor(livro, i);
+                    grid.appendChild(btnCap);
+                }
+                grid.style.display = "grid";
+            }
+        }
+
+        function filtrarCapitulos(input) {
+            const val = input.value;
+            const caps = input.closest('.capitulos-grid').querySelectorAll('.btn-cap');
+            caps.forEach(c => c.style.display = (val === "" || c.innerText.startsWith(val)) ? "block" : "none");
+        }
+
+        async function fetchBibleData(versao) {
+            if (BIBLE_CACHE[versao]) return BIBLE_CACHE[versao];
+            const res = await fetch(`${versao}.json`);
+            const data = await res.json();
+            BIBLE_CACHE[versao] = data;
+            return data;
+        }
+
+        async function abrirLeitor(livro, cap) {
+            contexto.livro = livro; contexto.cap = cap;
+            document.getElementById('reader-overlay').style.display = 'flex';
+            carregarTexto();
+        }
+
+        async function carregarTexto() {
+            const cont = document.getElementById('reader-text');
+            cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando...</p>";
+            try {
+                const data = await fetchBibleData(contexto.versao);
+                const livros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+                const lData = livros.find(l => (l.nome || l.name).toLowerCase() === contexto.livro.toLowerCase());
+                const capítulos = lData.chapters || lData.capitulos;
+                const versos = capítulos[contexto.cap - 1];
+                
+                document.getElementById('reader-title').innerText = `${contexto.livro} ${contexto.cap}`;
+                cont.innerHTML = versos.map((v, i) => `<div class="verse-row" onclick="compararVerso(${i})"><span class="verse-num">${i+1}</span>${v}</div>`).join('');
+                cont.scrollTop = 0;
+                renderBotoesNavegacao();
+            } catch (e) { cont.innerHTML = "Erro ao carregar texto."; }
+        }
+
+        function renderBotoesNavegacao() {
+            const footer = document.getElementById('reader-footer-ctrl');
+            footer.innerHTML = "";
+            const livroData = BIBLE_DATA.find(l => l.n === contexto.livro);
+
+            const btnPrev = document.createElement('button');
+            btnPrev.className = "btn-nav-leitor btn-side";
+            btnPrev.innerText = "❮";
+            btnPrev.onclick = () => mudarCapitulo(-1);
+            if (contexto.cap === 1) btnPrev.style.opacity = "0.3";
+            footer.appendChild(btnPrev);
+
+            const btnOk = document.createElement('button');
+            btnOk.className = "btn-nav-leitor btn-expand";
+            btnOk.innerText = "FINALIZAR E FECHAR";
+            btnOk.onclick = fecharLeitor;
+            footer.appendChild(btnOk);
+
+            const btnNext = document.createElement('button');
+            btnNext.className = "btn-nav-leitor btn-side";
+            btnNext.innerText = "❯";
+            btnNext.onclick = () => mudarCapitulo(1);
+            if (contexto.cap === livroData.c) btnNext.style.opacity = "0.3";
+            footer.appendChild(btnNext);
+        }
+
+        function mudarCapitulo(dir) {
+            const livroData = BIBLE_DATA.find(l => l.n === contexto.livro);
+            let novoCap = contexto.cap + dir;
+            if (novoCap >= 1 && novoCap <= livroData.c) {
+                contexto.cap = novoCap;
+                carregarTexto();
+            }
+        }
+
+        async function compararVerso(idx) {
+            document.getElementById('confirm-overlay').style.display = 'block';
+            document.getElementById('compare-modal').style.display = 'block';
+            document.getElementById('compare-ref').innerText = `${contexto.livro} ${contexto.cap}:${idx+1}`;
+            let html = "";
+            for(let v of ['acf', 'nvi', 'kja']) {
+                try {
+                    const data = await fetchBibleData(v);
+                    const livros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+                    const lData = livros.find(l => (l.nome || l.name).toLowerCase() === contexto.livro.toLowerCase());
+                    const txt = (lData.chapters || lData.capitulos)[contexto.cap-1][idx];
+                    html += `<div class="compare-item"><span class="compare-label">${v.toUpperCase()}</span><p>${txt}</p></div>`;
+                } catch(e){}
+            }
+            document.getElementById('compare-list').innerHTML = html;
+        }
+
+        function fecharComparacao() {
+            document.getElementById('confirm-overlay').style.display = 'none';
+            document.getElementById('compare-modal').style.display = 'none';
+        }
+
+        function fecharLeitor() { document.getElementById('reader-overlay').style.display = 'none'; sintetizador.cancel(); }
+        function trocarVersao(v) { contexto.versao = v; carregarTexto(); }
+        function mudarFonte(d) { fontSize += d; document.getElementById('reader-text').style.fontSize = fontSize + "rem"; }
+        function setTema(t) { 
+            const el = document.getElementById('reader-overlay');
+            el.classList.remove('theme-sepia', 'theme-dark');
+            if(t !== 'light') el.classList.add('theme-' + t);
+        }
+
+        function alternarVoz() {
+            if(sintetizador.speaking) { sintetizador.cancel(); document.getElementById('btn-voz').innerText = "▶️"; }
+            else {
+                const texto = document.getElementById('reader-text').innerText.replace(/[0-9]/g, '');
+                const ut = new SpeechSynthesisUtterance(texto);
+                ut.lang = 'pt-BR'; ut.onend = () => document.getElementById('btn-voz').innerText = "▶️";
+                document.getElementById('btn-voz').innerText = "⏹️";
+                sintetizador.speak(ut);
+            }
+        }
+
+        function switchTestamento(t) {
+            testamentoAtual = t;
+            document.querySelectorAll('.btn-testamento').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + t).classList.add('active');
+            renderBiblia();
+        }
+
+        function filtrarLivros() { renderBiblia(document.getElementById('bibliaSearch').value); }
+
+        window.onload = () => { renderBiblia(); };
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registrado!', reg))
+      .catch(err => console.error('Falha ao registrar Service Worker:', err));
+  });
+}
+      
+    </script>
+</body>
+</html>
