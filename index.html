@@ -203,6 +203,24 @@
 #btn-install-now { background: var(--verde-sucesso); color: white; }
 #btn-not-now { background: #f0f0f0; color: #666; }
 
+.gender-option { 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    color: #fff; 
+    font-size: 0.85rem; 
+    font-weight: bold; 
+}
+.gender-option input[type="radio"] { 
+    accent-color: #f6d129; 
+    width: 18px; 
+    height: 18px; 
+}
+.gender-option span { 
+    letter-spacing: 1px; 
+}
+
     </style>
 </head>
 <body>
@@ -222,8 +240,22 @@
 <div id="welcome-overlay" style="display: none; position: fixed; inset: 0; background: #000; z-index: 15000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
     <img src="assets/icone_leao_biblia_app.png" style="width: 140px; border-radius: 25px; margin-bottom: 25px; border: 2px solid #f6d129;">
     <div class="app-main-title" style="font-size: 2.2rem; margin-bottom: 5px;">Bem-vindo</div>
-    <p style="color: #aaa; text-align: center; margin-bottom: 25px; font-family: 'Segoe UI', sans-serif;">Como podemos te chamar?</p>
+    <p style="color: #aaa; text-align: center; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif;">Como podemos te chamar?</p>
+    
     <input type="text" id="userNameInput" placeholder="Digite nome e sobrenome" style="width: 85%; max-width: 350px; padding: 18px; border-radius: 12px; border: 1px solid #f6d129; background: #1a1a1a; color: #fff; font-size: 1.1rem; text-align: center; outline: none; margin-bottom: 20px;">
+    
+    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;">Selecione como deseja ser saudado:</p>
+    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <label class="gender-option">
+            <input type="radio" name="userGender" value="M" checked>
+            <span>HOMEM</span>
+        </label>
+        <label class="gender-option">
+            <input type="radio" name="userGender" value="F">
+            <span>MULHER</span>
+        </label>
+    </div>
+
     <button onclick="salvarNomeUsuario()" style="width: 85%; max-width: 350px; padding: 15px; background: #f6d129; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;">ENTRAR NO APP</button>
 </div>
 
@@ -760,36 +792,48 @@ document.getElementById('btn-not-now').addEventListener('click', () => {
             return partes.length > 1 ? `${p} ${cap(partes[1])}` : p;
         }
 
-        function salvarNomeUsuario() {
-            const input = document.getElementById('userNameInput');
-            if (input.value.trim().length < 3) {
-                alert("Por favor, digite seu nome e sobrenome.");
-                return;
-            }
-            const nomeFinal = formatarNome(input.value);
-            localStorage.setItem('stilli_user_name', nomeFinal); 
-            document.getElementById('welcome-overlay').style.display = 'none';
-            exibirSaudacao(nomeFinal);
-        }
+      // Função para salvar nome e gênero
+function salvarNomeUsuario() {
+    const input = document.getElementById('userNameInput');
+    const generoSelecionado = document.querySelector('input[name="userGender"]:checked').value;
 
-        function exibirSaudacao(nome) {
-            const div = document.getElementById('saudacao-usuario');
-            div.innerHTML = `Olá, <b>${nome}</b> seja bem vindo 🥳`;
-            div.style.display = 'block';
-        }
+    if (input.value.trim().length < 3) {
+        alert("Por favor, digite seu nome e sobrenome.");
+        return;
+    }
 
-        window.addEventListener('load', () => {
-            const nomeSalvo = localStorage.getItem('stilli_user_name');
-            const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const nomeFinal = formatarNome(input.value);
+    
+    // Salva os dois dados no localStorage
+    localStorage.setItem('stilli_user_name', nomeFinal);
+    localStorage.setItem('stilli_user_gender', generoSelecionado);
+    
+    document.getElementById('welcome-overlay').style.display = 'none';
+    exibirSaudacao(nomeFinal, generoSelecionado);
+}
 
-            // Se já tem nome salvo, mostra a saudação direto
-            if (nomeSalvo) {
-                exibirSaudacao(nomeSalvo);
-            } 
-            // Se o app foi ABERTO pelo ícone instalado e não tem nome, pede o nome
-            else if (isInstalled) {
-                document.getElementById('welcome-overlay').style.display = 'flex';
-            }
+// Função para exibir a saudação personalizada
+function exibirSaudacao(nome, genero) {
+    const div = document.getElementById('saudacao-usuario');
+    const bemVindo = (genero === 'F') ? 'bem-vinda' : 'bem-vindo';
+    
+    div.innerHTML = `Olá, <b>${nome}</b> seja ${bemVindo}!!!`;
+    div.style.display = 'block';
+}
+
+// Ajuste na verificação inicial
+window.addEventListener('load', () => {
+    const nomeSalvo = localStorage.getItem('stilli_user_name');
+    const generoSalvo = localStorage.getItem('stilli_user_gender');
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (nomeSalvo) {
+        // Agora passa o gênero salvo também
+        exibirSaudacao(nomeSalvo, generoSalvo || 'M'); 
+    } 
+    else if (isInstalled) {
+        document.getElementById('welcome-overlay').style.display = 'flex';
+    }
 
             // Lógica do Banner de Instalação (PWA)
             let deferredPrompt;
