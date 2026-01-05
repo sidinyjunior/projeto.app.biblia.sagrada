@@ -265,6 +265,14 @@
         Copyright © 2026 - Todos os Direitos Reservados
     </footer>
 
+    <div id="install-banner">
+    <span style="font-size: 0.9rem; font-weight: bold; color: #333;">Deseja instalar o Aplicativo na tela inicial?</span>
+    <div class="banner-buttons">
+        <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
+        <button id="btn-install-now" class="btn-pwa">INSTALAR</button>
+    </div>
+</div>
+
     <script>
         const BIBLE_DATA = [
             {n: "Gênesis", c: 50, cat: "Pentateuco", t: "vt", col: "#d35400"},
@@ -681,7 +689,7 @@ window.addEventListener('appinstalled', () => {
     console.log('PWA instalado com sucesso!');
 });
 
-    </script>
+    </script>    
 </body>
 </html>
 
