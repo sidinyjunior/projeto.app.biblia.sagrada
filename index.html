@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V18 -->
+    <!-- V20 -->
     <title>Projeto App Bíblia Sagrada</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -145,26 +145,33 @@
             margin-right: 2px;
         }
 
-        /* BANNER DE INSTALAÇÃO PWA */
+/* BANNER DE INSTALAÇÃO NO TOPO */
 #install-banner {
-    display: none; /* Começa escondido, o JS mostrará */
+    display: none; 
     position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 400px;
-    background: #fff;
+    top: 0; /* Fixa no topo */
+    left: 0;
+    right: 0;
+    width: 100%; /* Ocupa a largura toda para parecer uma barra oficial */
+    max-width: none;
+    background: #ffffff;
     color: #333;
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 0 0 20px 20px; /* Arredonda só a parte de baixo */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     z-index: 10000;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-    border: 2px solid var(--primary);
+    gap: 12px;
+    border-bottom: 3px solid var(--primary);
+    animation: deslizarBaixo 0.5s ease-out;
 }
+
+@keyframes deslizarBaixo {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+        
 .banner-buttons { display: flex; gap: 10px; width: 100%; }
 .btn-pwa { 
     flex: 1; border: none; padding: 12px; border-radius: 10px; 
@@ -265,15 +272,27 @@
         Copyright © 2026 - Todos os Direitos Reservados
     </footer>
 
+   <footer>
+        Criado e Desenvolvido por <b>Sidiny Junior</b><br>
+        Copyright © 2026 - Todos os Direitos Reservados
+    </footer>
+
     <div id="install-banner">
-    <span style="font-size: 0.9rem; font-weight: bold; color: #333;">Deseja instalar o Aplicativo na tela inicial?</span>
-    <div class="banner-buttons">
-        <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
-        <button id="btn-install-now" class="btn-pwa">INSTALAR</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="assets/icone_leao_biblia_app.png" style="width: 30px; border-radius: 5px;">
+            <span style="font-size: 0.85rem; font-weight: bold; color: #333;">Instalar Bíblia Sagrada no Celular?</span>
+        </div>
+        <div class="banner-buttons">
+            <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
+            <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
+        </div>
     </div>
-</div>
 
     <script>
+        // Aqui começa o seu JavaScript...
+
+    <script>
+        
         const BIBLE_DATA = [
             {n: "Gênesis", c: 50, cat: "Pentateuco", t: "vt", col: "#d35400"},
             {n: "Êxodo", c: 40, cat: "Pentateuco", t: "vt", col: "#d35400"},
@@ -342,6 +361,18 @@
             {n: "Judas", c: 1, cat: "Epístolas", t: "nt", col: "#3CA6A6"},
             {n: "Apocalipse", c: 22, cat: "Revelação", t: "nt", col: "#FFAE00"}
         ];
+
+
+                // Função para verificar se deve mostrar o banner imediatamente
+window.addEventListener('load', () => {
+    // Se não estiver instalado e for um navegador que suporta PWA
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+        setTimeout(() => {
+            const banner = document.getElementById('install-banner');
+            if (banner) banner.style.display = 'flex';
+        }, 2000); // Aparece 2 segundos após abrir o link
+    }
+});
 
         let testamentoAtual = 'vt';
         let contexto = { livro: "", cap: 1, versao: "acf" };
