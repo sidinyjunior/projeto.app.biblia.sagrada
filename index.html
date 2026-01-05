@@ -208,6 +208,32 @@
 </head>
 <body>
 
+    <div id="install-banner">
+    <div style="text-align: center;">
+        <span style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">
+            Instalar Bíblia Sagrada no Celular?
+        </span>
+    </div>
+    <div class="banner-buttons">
+        <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
+        <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
+    </div>
+</div>
+
+<div id="welcome-overlay" style="display: none; position: fixed; inset: 0; background: #000; z-index: 15000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <img src="assets/icone_leao_biblia_app.png" style="width: 140px; border-radius: 25px; margin-bottom: 25px; border: 2px solid #f6d129;">
+    <div class="app-main-title" style="font-size: 2.2rem; margin-bottom: 5px;">Bem-vindo</div>
+    <p style="color: #aaa; text-align: center; margin-bottom: 25px; font-family: 'Segoe UI', sans-serif;">Como podemos te chamar?</p>
+    <input type="text" id="userNameInput" placeholder="Digite nome e sobrenome" style="width: 85%; max-width: 350px; padding: 18px; border-radius: 12px; border: 1px solid #f6d129; background: #1a1a1a; color: #fff; font-size: 1.1rem; text-align: center; outline: none; margin-bottom: 20px;">
+    <button onclick="salvarNomeUsuario()" style="width: 85%; max-width: 350px; padding: 15px; background: #f6d129; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;">ENTRAR NO APP</button>
+</div>
+
+<div class="header">
+    <img src="assets/icone_leao_biblia_app.png" alt="Logo">
+    <div class="app-main-title">Stilli Holy Bible</div>
+    <div id="saudacao-usuario" style="text-align: center; color: #fff; margin-top: -10px; margin-bottom: 20px; font-size: 1.1rem; display: none; font-family: 'Segoe UI', sans-serif;"></div>
+</div>
+
     <div id="confirm-overlay" onclick="fecharComparacao()"></div>
 
     <div id="compare-modal">
@@ -733,16 +759,88 @@ document.getElementById('btn-not-now').addEventListener('click', () => {
     document.getElementById('install-banner').style.display = 'none';
 });
 
-// 4. Esconde o banner se o app já estiver instalado
-window.addEventListener('appinstalled', () => {
-    document.getElementById('install-banner').style.display = 'none';
-    deferredPrompt = null;
-    console.log('PWA instalado com sucesso!');
-});
+        // 4. Lógica de Instalação e Identificação do Usuário (Gran Finale)
+        function formatarNome(nomeCompleto) {
+            const partes = nomeCompleto.trim().split(/\s+/); 
+            if (partes.length === 0) return "";
+            const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+            const p = cap(partes[0]);
+            return partes.length > 1 ? `${p} ${cap(partes[1])}` : p;
+        }
 
-    </script>    
+        function salvarNomeUsuario() {
+            const input = document.getElementById('userNameInput');
+            if (input.value.trim().length < 3) {
+                alert("Por favor, digite seu nome e sobrenome.");
+                return;
+            }
+            const nomeFinal = formatarNome(input.value);
+            localStorage.setItem('stilli_user_name', nomeFinal); 
+            document.getElementById('welcome-overlay').style.display = 'none';
+            exibirSaudacao(nomeFinal);
+        }
+
+        function exibirSaudacao(nome) {
+            const div = document.getElementById('saudacao-usuario');
+            div.innerHTML = `Olá, <b>${nome}</b> seja bem vindo 🥳`;
+            div.style.display = 'block';
+        }
+
+        window.addEventListener('load', () => {
+            const nomeSalvo = localStorage.getItem('stilli_user_name');
+            const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+            // Se já tem nome salvo, mostra a saudação direto
+            if (nomeSalvo) {
+                exibirSaudacao(nomeSalvo);
+            } 
+            // Se o app foi ABERTO pelo ícone instalado e não tem nome, pede o nome
+            else if (isInstalled) {
+                document.getElementById('welcome-overlay').style.display = 'flex';
+            }
+
+            // Lógica do Banner de Instalação (PWA)
+            let deferredPrompt;
+            const installBanner = document.getElementById('install-banner');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Só mostra o banner se ainda não estiver instalado
+                if (!isInstalled) {
+                    installBanner.style.display = 'flex';
+                }
+            });
+
+            document.getElementById('btn-install-now').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installBanner.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                }
+            });
+
+            document.getElementById('btn-not-now').addEventListener('click', () => {
+                installBanner.style.display = 'none';
+            });
+            
+            // Esconde o banner se a instalação for concluída
+            window.addEventListener('appinstalled', () => {
+                installBanner.style.display = 'none';
+                console.log('PWA instalado com sucesso!');
+            });
+        });
+
+    </script>
 </body>
 </html>
+
+
+
+  
 
 
         
