@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V26 -->
-    <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&display=swap" rel="stylesheet">
-    <title>Projeto App Bíblia Sagrada</title>
+    <!-- V27 -->
+    <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+    <title>Projeto Stille Holy Bible</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icone_leao_biblia_app.png">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+
     
     <style>
         :root {
@@ -156,7 +155,7 @@
     
     /* AJUSTES DE ESPAÇO - Mexa aqui para afastar ou aproximar */
     margin-top: 0px;    /* Distância em relação ao Leão */
-    margin-bottom: 50px; /* Distância em relação à Pesquisa */
+    margin-bottom: 30px; /* Distância em relação à Pesquisa */
 }
 
 /* BANNER DE INSTALAÇÃO (Versão Slim, Reta e Centralizada) */
@@ -318,12 +317,6 @@
         Copyright © 2026 - Todos os Direitos Reservados
     </footer>
 
-    <div id="install-banner">
-    <div style="text-align: center;">
-        <span style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">
-            Instalar Bíblia Sagrada no Celular?
-        </span>
-    </div>
     <div class="banner-buttons">
         <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
         <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
@@ -620,7 +613,11 @@ window.addEventListener('load', () => {
 
         function pararVoz() { sintetizador.cancel(); statusVoz = 'parado'; if (document.getElementById('btn-voz')) document.getElementById('btn-voz').innerText = "▶️"; }
         function switchTestamento(t) { testamentoAtual = t; document.querySelectorAll('.btn-testamento').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + t).classList.add('active'); renderBiblia(); }
-        function filtrarLivros() { renderBiblia(document.getElementById('bibliaSearch').value); }
+        function filtrarLivros() {
+    const termo = document.getElementById('bibliaSearch').value;
+    renderBiblia(termo);
+    // Se estiver pesquisando, as categorias somem para focar no resultado
+}
         window.onload = () => { renderBiblia(); };
 
         if ('serviceWorker' in navigator) {
