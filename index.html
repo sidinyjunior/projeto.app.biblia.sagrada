@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V21 -->
+    <!-- V22 -->
     <title>Projeto App Bíblia Sagrada</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -145,40 +145,48 @@
             margin-right: 2px;
         }
 
-/* BANNER DE INSTALAÇÃO NO TOPO */
+        
 #install-banner {
     display: none; 
     position: fixed;
-    top: 0; /* Fixa no topo */
+    top: 0;
     left: 0;
     right: 0;
-    width: 100%; /* Ocupa a largura toda para parecer uma barra oficial */
-    max-width: none;
+    width: 100%;
     background: #ffffff;
     color: #333;
-    padding: 15px;
-    border-radius: 0 0 20px 20px; /* Arredonda só a parte de baixo */
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    padding: 15px 0; /* Padding vertical apenas */
+    border-radius: 0; /* Remove curvas nas quinas */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     z-index: 10000;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* Centraliza o conteúdo horizontalmente */
+    justify-content: center;
     gap: 12px;
-    border-bottom: 3px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
     animation: deslizarBaixo 0.5s ease-out;
 }
 
-@keyframes deslizarBaixo {
-    from { transform: translateY(-100%); }
-    to { transform: translateY(0); }
+.banner-buttons { 
+    display: flex; 
+    gap: 15px; /* Espaço entre os botões */
+    justify-content: center; 
+    width: auto; /* Não ocupa a largura toda */
 }
-        
-.banner-buttons { display: flex; gap: 10px; width: 100%; }
+
 .btn-pwa { 
-    flex: 1; border: none; padding: 12px; border-radius: 10px; 
-    font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; 
+    padding: 8px 15px; /* Botões menores */
+    border: none; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    text-transform: uppercase; 
+    font-size: 0.7rem; /* Fonte menor */
+    min-width: 100px; /* Largura mínima padronizada */
 }
+
 #btn-install-now { background: var(--verde-sucesso); color: white; }
-#btn-not-now { background: #eee; color: #333; }
+#btn-not-now { background: #f0f0f0; color: #666; }
 
     </style>
 </head>
@@ -278,15 +286,18 @@
     </footer>
 
     <div id="install-banner">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="assets/icone_leao_biblia_app.png" style="width: 30px; border-radius: 5px;">
-            <span style="font-size: 0.85rem; font-weight: bold; color: #333;">Instalar Bíblia Sagrada no Celular?</span>
-        </div>
-        <div class="banner-buttons">
-            <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
-            <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
-        </div>
+    <div style="text-align: center;">
+        <span style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">
+            Instalar Bíblia Sagrada no Celular?
+        </span>
     </div>
+    <div class="banner-buttons">
+        <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
+        <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
+    </div>
+</div>
+
+
 
     <script>
         
