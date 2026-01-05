@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V23 -->
+    <!-- V24 -->
+    <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&display=swap" rel="stylesheet">
     <title>Projeto App Bíblia Sagrada</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -145,27 +146,42 @@
             margin-right: 2px;
         }
 
-        
+        /* Título Customizado (Advent Pro) */
+.app-main-title {
+    font-family: 'Advent Pro', sans-serif;
+    color: #f6d129;
+    font-size: 2.8rem; /* Tamanho ajustável */
+    text-align: center;
+    font-weight: 600;
+    
+    /* AJUSTES DE ESPAÇO - Mexa aqui para afastar ou aproximar */
+    margin-top: 15px;    /* Distância em relação ao Leão */
+    margin-bottom: 25px; /* Distância em relação à Pesquisa */
+}
+
+/* BANNER DE INSTALAÇÃO (Versão Slim, Reta e Centralizada) */
 #install-banner {
     display: none; 
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 0; 
+    left: 0; 
     right: 0;
     width: 100%;
     background: #ffffff;
     color: #333;
-    padding: 15px 0; /* Padding vertical apenas */
-    border-radius: 0; /* Remove curvas nas quinas */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    padding: 15px 0;
+    border-radius: 0; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     z-index: 10000;
     flex-direction: column;
-    align-items: center; /* Centraliza o conteúdo horizontalmente */
+    align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     border-bottom: 2px solid var(--primary);
-    animation: deslizarBaixo 0.5s ease-out;
 }
+
+        
+
 
 .banner-buttons { 
     display: flex; 
@@ -213,6 +229,7 @@
 
     <div class="header">
         <img src="assets/icone_leao_biblia_app.png" alt="Logo">
+        <div class="app-main-title">Stilli Holy Bible</div>
     </div>
 
     <div class="container">
