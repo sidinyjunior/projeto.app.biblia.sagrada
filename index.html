@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V16 -->
+    <!-- V17 -->
     <title>Projeto App Bíblia Sagrada</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -144,6 +144,34 @@
             font-weight: bold;
             margin-right: 2px;
         }
+
+        /* BANNER DE INSTALAÇÃO PWA */
+#install-banner {
+    display: none; /* Começa escondido, o JS mostrará */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: #fff;
+    color: #333;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 10000;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    border: 2px solid var(--primary);
+}
+.banner-buttons { display: flex; gap: 10px; width: 100%; }
+.btn-pwa { 
+    flex: 1; border: none; padding: 12px; border-radius: 10px; 
+    font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; 
+}
+#btn-install-now { background: var(--verde-sucesso); color: white; }
+#btn-not-now { background: #eee; color: #333; }
 
     </style>
 </head>
@@ -610,6 +638,48 @@
             filtrarLivros();  // Volta a mostrar todos os livros na lista
             input.focus();    // Deixa o cursor piscando no campo pronto para digitar de novo
         }
+
+        let deferredPrompt;
+
+// 1. Escuta o navegador perguntando se pode instalar
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Impede o navegador de mostrar o prompt padrão feio
+    e.preventDefault();
+    // Guarda o evento para usar depois
+    deferredPrompt = e;
+    // Mostra o SEU banner bonito
+    const banner = document.getElementById('install-banner');
+    if (banner) {
+        banner.style.display = 'flex';
+    }
+});
+
+// 2. Ação do Botão "INSTALAR"
+document.getElementById('btn-install-now').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Mostra a caixa de confirmação oficial do navegador
+        deferredPrompt.prompt();
+        // Espera a escolha do usuário
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Usuário escolheu: ${outcome}`);
+        // Limpa o evento pois ele só pode ser usado uma vez
+        deferredPrompt = null;
+        // Esconde o banner
+        document.getElementById('install-banner').style.display = 'none';
+    }
+});
+
+// 3. Ação do Botão "AGORA NÃO"
+document.getElementById('btn-not-now').addEventListener('click', () => {
+    document.getElementById('install-banner').style.display = 'none';
+});
+
+// 4. Esconde o banner se o app já estiver instalado
+window.addEventListener('appinstalled', () => {
+    document.getElementById('install-banner').style.display = 'none';
+    deferredPrompt = null;
+    console.log('PWA instalado com sucesso!');
+});
 
     </script>
 </body>
