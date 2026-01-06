@@ -18,8 +18,8 @@
             --primary: #F29325;
             --bg: #000000;
             --card-bg: rgba(26, 26, 26, 0.9);
-            --vt-color: #fbd751;
-            --nt-color: #F29325;
+            --vt-color: #8CF38A;
+            --nt-color: #77F2FF;
             --verde-sucesso: #2ecc71;
             --amarelo: #f1c40f;
             --verde-escuro: #1a4731;
@@ -29,8 +29,8 @@
         }
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        .header { text-align: center; padding: 15px 0; width: 100%; }
-        .header img { width: 150px; border-radius: 20px; }
+        .header { text-align: center; padding: 10px 0 0 0; width: 100%; }
+        .header img { width: 150px; border-radius: 20px; margin-bottom: -10px; /* Aumentei um pouco para colar mais */}
         .container { width: 95%; max-width: 500px; flex: 1; display: flex; flex-direction: column; }
 
         .search-container { background:#fff; border-radius:25px; margin-bottom:20px; padding:5px 15px; display:flex; align-items:center; }
@@ -75,8 +75,7 @@
         .compare-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .compare-label { font-weight: bold; color: var(--verde-escuro); font-size: 0.8rem; text-transform: uppercase; }
 
-        footer { text-align: center; padding: 20px; width: 100%; color: #7f8c8d; font-size: 0.8rem; }
-
+       footer { text-align: center; padding: 5px 20px 10px 20px; width: 100%; color: #7f8c8d; font-size: 0.8rem; }
         /* Cores do Marca-texto */
         .mark-yellow { background-color: rgba(241, 196, 15, 0.5) !important; color: #000 !important; border-radius: 4px; }
         .mark-green { background-color: rgba(46, 204, 113, 0.5) !important; color: #000 !important; border-radius: 4px; }
@@ -108,12 +107,19 @@
         .search-item-text { color: #666; font-size: 0.9rem; line-height: 1.4; }
         .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
 
-        /* Busca Local dentro do Grid de Capítulos */
-        .local-search-results {
-            grid-column: span 5; background: rgba(242, 147, 37, 0.1); border-radius: 10px;
-            padding: 10px; margin-top: 10px; max-height: 250px; overflow-y: auto;
-            display: none; border: 1px dashed var(--primary);
-        }
+.local-search-results {
+    grid-column: 1 / -1 !important; /* Força ocupar da coluna 1 até a última */
+    width: 100% !important;
+    background: rgba(242, 147, 37, 0.15);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+    border: 1px dashed var(--primary);
+    box-sizing: border-box; /* Importante para o padding não empurrar a borda */
+}
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }
 
@@ -155,7 +161,7 @@
     
     /* AJUSTES DE ESPAÇO - Mexa aqui para afastar ou aproximar */
     margin-top: 0px;    /* Distância em relação ao Leão */
-    margin-bottom: 30px; /* Distância em relação à Pesquisa */
+    margin-bottom: 40px; /* Distância em relação à Pesquisa */
 }
 
 /* BANNER DE INSTALAÇÃO (Versão Slim, Reta e Centralizada) */
@@ -203,6 +209,24 @@
 #btn-install-now { background: var(--verde-sucesso); color: white; }
 #btn-not-now { background: #f0f0f0; color: #666; }
 
+.gender-option { 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    color: #fff; 
+    font-size: 0.85rem; 
+    font-weight: bold; 
+}
+.gender-option input[type="radio"] { 
+    accent-color: #f6d129; 
+    width: 18px; 
+    height: 18px; 
+}
+.gender-option span { 
+    letter-spacing: 1px; 
+}
+
     </style>
 </head>
 <body>
@@ -221,16 +245,29 @@
 
 <div id="welcome-overlay" style="display: none; position: fixed; inset: 0; background: #000; z-index: 15000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
     <img src="assets/icone_leao_biblia_app.png" style="width: 140px; border-radius: 25px; margin-bottom: 25px; border: 2px solid #f6d129;">
-    <div class="app-main-title" style="font-size: 2.2rem; margin-bottom: 5px;">Bem-vindo</div>
-    <p style="color: #aaa; text-align: center; margin-bottom: 25px; font-family: 'Segoe UI', sans-serif;">Como podemos te chamar?</p>
-    <input type="text" id="userNameInput" placeholder="Digite nome e sobrenome" style="width: 85%; max-width: 350px; padding: 18px; border-radius: 12px; border: 1px solid #f6d129; background: #1a1a1a; color: #fff; font-size: 1.1rem; text-align: center; outline: none; margin-bottom: 20px;">
+    <div class="app-main-title" style="font-size: 2.2rem; margin-bottom: 5px;">Muito bom ter você aqui</div>
+    <p style="color: #aaa; text-align: center; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif;">Como gostaria que te chamássemos?</p>
+    
+    <input type="text" id="userNameInput" placeholder="Digite nome e sobrenome preferido" style="width: 85%; max-width: 350px; padding: 18px; border-radius: 12px; border: 1px solid #f6d129; background: #1a1a1a; color: #fff; font-size: 1.1rem; text-align: center; outline: none; margin-bottom: 20px;">
+    
+    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <label class="gender-option">
+            <input type="radio" name="userGender" value="M" checked>
+            <span>HOMEM</span>
+        </label>
+        <label class="gender-option">
+            <input type="radio" name="userGender" value="F">
+            <span>MULHER</span>
+        </label>
+    </div>
+
     <button onclick="salvarNomeUsuario()" style="width: 85%; max-width: 350px; padding: 15px; background: #f6d129; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;">ENTRAR NO APP</button>
 </div>
 
 <div class="header">
     <img src="assets/icone_leao_biblia_app.png" alt="Logo">
     <div class="app-main-title">Stilli Holy Bible</div>
-    <div id="saudacao-usuario" style="text-align: center; color: #fff; margin-top: -10px; margin-bottom: 20px; font-size: 1.1rem; display: none; font-family: 'Segoe UI', sans-serif;"></div>
+    <div id="saudacao-usuario" style="text-align: center; color: #fff; margin-top: -10px; margin-bottom: 10px; font-size: 1.1rem; display: none; font-family: 'Segoe UI', sans-serif;"></div>
 </div>
 
     <div id="confirm-overlay" onclick="fecharComparacao()"></div>
@@ -254,7 +291,7 @@
 
     <div class="container">
         <div class="search-container">
-    <input type="text" id="bibliaSearch" placeholder="Pesquisar..." onkeyup="filtrarLivros()">
+    <input type="text" id="bibliaSearch" placeholder="Pesquisar em toda a Bíblia..." onkeyup="filtrarLivros()">
     <div class="search-actions">
         <button class="btn-search-neutral btn-limpar" onclick="limparBuscaPrincipal()">✕</button>
         <button class="btn-search-neutral" onclick="executarBuscaGlobal(document.getElementById('bibliaSearch').value)">
@@ -316,14 +353,6 @@
         Criado e Desenvolvido por <b>Sidiny Junior</b><br>
         Copyright © 2026 - Todos os Direitos Reservados
     </footer>
-
-    <div class="banner-buttons">
-        <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
-        <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
-    </div>
-</div>
-
-
 
     <script>
         
@@ -633,80 +662,104 @@ window.addEventListener('load', () => {
         function fecharBusca() { document.getElementById('search-overlay').style.display = 'none'; }
         document.getElementById('bibliaSearch').addEventListener('keypress', (e) => { if (e.key === 'Enter') executarBuscaGlobal(e.target.value); });
 
+        
         async function executarBuscaGlobal(termo) {
-            if (termo.length < 3) { alert("Digite pelo menos 3 letras."); return; }
-            const overlay = document.getElementById('search-overlay');
-            const container = document.getElementById('search-results');
-            const termDisplay = document.getElementById('search-term-display');
-            const countDisplay = document.getElementById('search-info-count');
+    if (termo.length < 2) { alert("Digite pelo menos 2 letras."); return; }
+    const overlay = document.getElementById('search-overlay');
+    const container = document.getElementById('search-results');
+    const termDisplay = document.getElementById('search-term-display');
+    const countDisplay = document.getElementById('search-info-count');
 
-            overlay.style.display = 'flex';
-            termDisplay.innerText = termo;
-            container.innerHTML = "<p style='text-align:center; padding:20px; color:#999;'>🔍 Buscando...</p>";
-            countDisplay.innerText = "Buscando...";
+    overlay.style.display = 'flex';
+    termDisplay.innerText = termo;
+    container.innerHTML = "<p style='text-align:center; padding:20px; color:#999;'>🔍 Buscando...</p>";
+    countDisplay.innerText = "Buscando...";
 
-            try {
-                const data = await fetchBibleData(contexto.versao);
-                let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
-                let resultados = [];
-                const termoNormalizado = limparTexto(termo.trim());
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        let resultados = [];
+        const termoNormalizado = limparTexto(termo.trim());
 
-                listaLivros.forEach(livro => {
-                    const nomeLivro = livro.nome || livro.name;
-                    const caps = livro.chapters || livro.capitulos;
-                    caps.forEach((versos, cIdx) => {
-                        versos.forEach((vTexto, vIdx) => {
-                            if (limparTexto(vTexto).includes(termoNormalizado)) {
-                                resultados.push({ livro: nomeLivro, cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
-                            }
-                        });
-                    });
+        // LÓGICA DE PALAVRA EXATA PARA 2 OU 3 LETRAS
+        const regexBusca = (termoNormalizado.length <= 3) 
+            ? new RegExp(`\\b${termoNormalizado}\\b`, 'gi') 
+            : new RegExp(`${termoNormalizado}`, 'gi');
+
+        listaLivros.forEach(livro => {
+            const nomeLivro = livro.nome || livro.name;
+            const caps = livro.chapters || livro.capitulos;
+            caps.forEach((versos, cIdx) => {
+                versos.forEach((vTexto, vIdx) => {
+                    const textoNormalizado = limparTexto(vTexto);
+                    // Testa se a palavra bate com a regra da RegExp
+                    if (regexBusca.test(textoNormalizado)) {
+                        resultados.push({ livro: nomeLivro, cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
+                    }
                 });
+            });
+        });
 
-                countDisplay.innerText = `${resultados.length} encontrados`;
-                if (resultados.length === 0) container.innerHTML = "<p style='text-align:center; padding:20px;'>Nenhum resultado.</p>";
-                else {
-                    container.innerHTML = resultados.map(r => {
-                        const regex = new RegExp(`(${termo})`, 'gi');
-                        return `<div class="search-item-box" onclick="irParaVersiculo('${r.livro}', ${r.cap})">
-                                    <span class="search-item-ref">${r.livro} ${r.cap}:${r.verso}</span>
-                                    <div class="search-item-text">${r.texto.replace(regex, "<b>$1</b>")}</div>
-                                </div>`;
-                    }).join('');
-                }
-            } catch (e) { container.innerHTML = "Erro ao buscar."; }
+        countDisplay.innerText = `${resultados.length} encontrados`;
+        if (resultados.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px;'>Nenhum resultado exato encontrado.</p>";
+        } else {
+            const regexHighlight = new RegExp(`(${termo})`, 'gi');
+            container.innerHTML = resultados.map(r => {
+                return `<div class="search-item-box" onclick="irParaVersiculo('${r.livro}', ${r.cap})">
+                            <span class="search-item-ref">${r.livro} ${r.cap}:${r.verso}</span>
+                            <div class="search-item-text">${r.texto.replace(regexHighlight, "<b>$1</b>")}</div>
+                        </div>`;
+            }).join('');
         }
+    } catch (e) { container.innerHTML = "Erro ao buscar."; }
+}
 
+  
         function irParaVersiculo(livro, cap) { fecharBusca(); abrirLeitor(livro, cap); }
 
-        async function executarBuscaLocal(input, nomeLivro) {
-            const termo = input.value.trim();
-            const termoLimpo = limparTexto(termo);
-            const container = input.nextElementSibling;
-            if (termoLimpo.length < 3) { container.style.display = "none"; return; }
-            try {
-                const data = await fetchBibleData(contexto.versao);
-                let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
-                const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(nomeLivro));
-                const capitulos = lData.chapters || lData.capitulos;
-                let encontrados = [];
-                capitulos.forEach((versos, cIdx) => {
-                    versos.forEach((vTexto, vIdx) => {
-                        if (limparTexto(vTexto).includes(termoLimpo)) {
-                            encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
-                        }
-                    });
-                });
-                if (encontrados.length > 0) {
-                    container.style.display = "block";
-                    const regex = new RegExp(`(${termo})`, 'gi');
-                    container.innerHTML = encontrados.map(e => `
-                        <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
-                            <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regex, "<b>$1</b>")}
-                        </div>`).join('');
-                } else { container.style.display = "block"; container.innerHTML = "<div style='padding:10px;'>Nada encontrado.</div>"; }
-            } catch (e) { console.error(e); }
+    async function executarBuscaLocal(input, nomeLivro) {
+    const termo = input.value.trim();
+    const termoLimpo = limparTexto(termo);
+    const container = input.nextElementSibling;
+    
+    if (termoLimpo.length < 2) { container.style.display = "none"; return; }
+    
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(nomeLivro));
+        const capitulos = lData.chapters || lData.capitulos;
+        let encontrados = [];
+
+        // Criamos uma regra: se a palavra tiver 2 ou 3 letras, buscamos apenas a palavra exata
+        // O \b garante que não pegue partes de outras palavras
+        const regexBusca = (termoLimpo.length <= 3) 
+            ? new RegExp(`\\b${termoLimpo}\\b`, 'gi') 
+            : new RegExp(`${termoLimpo}`, 'gi');
+
+        capitulos.forEach((versos, cIdx) => {
+            versos.forEach((vTexto, vIdx) => {
+                const textoNormalizado = limparTexto(vTexto);
+                if (regexBusca.test(textoNormalizado)) {
+                    encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
+                }
+            });
+        });
+
+        if (encontrados.length > 0) {
+            container.style.display = "block";
+            const regexHighlight = new RegExp(`(${termo})`, 'gi');
+            container.innerHTML = encontrados.map(e => `
+                <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
+                    <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regexHighlight, "<b>$1</b>")}
+                </div>`).join('');
+        } else { 
+            container.style.display = "block"; 
+            container.innerHTML = "<div style='padding:10px;'>Nada encontrado com essa palavra exata.</div>"; 
         }
+    } catch (e) { console.error(e); }
+}
 
        
         function limparBuscaPrincipal() {
@@ -760,61 +813,96 @@ document.getElementById('btn-not-now').addEventListener('click', () => {
             return partes.length > 1 ? `${p} ${cap(partes[1])}` : p;
         }
 
-        function salvarNomeUsuario() {
-            const input = document.getElementById('userNameInput');
-            if (input.value.trim().length < 3) {
-                alert("Por favor, digite seu nome e sobrenome.");
-                return;
-            }
-            const nomeFinal = formatarNome(input.value);
-            localStorage.setItem('stilli_user_name', nomeFinal); 
-            document.getElementById('welcome-overlay').style.display = 'none';
-            exibirSaudacao(nomeFinal);
+      // Função para salvar nome e gênero
+function salvarNomeUsuario() {
+    const input = document.getElementById('userNameInput');
+    const generoSelecionado = document.querySelector('input[name="userGender"]:checked').value;
+
+    if (input.value.trim().length < 3) {
+        alert("Por favor, digite seu nome e sobrenome.");
+        return;
+    }
+
+    const nomeFinal = formatarNome(input.value);
+    
+    // Salva os dois dados no localStorage
+    localStorage.setItem('stilli_user_name', nomeFinal);
+    localStorage.setItem('stilli_user_gender', generoSelecionado);
+    
+    document.getElementById('welcome-overlay').style.display = 'none';
+    exibirSaudacao(nomeFinal, generoSelecionado);
+}
+
+// Função para exibir a saudação personalizada
+function exibirSaudacao(nome, genero) {
+    const div = document.getElementById('saudacao-usuario');
+    const bemVindo = (genero === 'F') ? 'bem-vinda' : 'bem-vindo';
+    
+    div.innerHTML = `Olá, <b>${nome}</b>, seja ${bemVindo}!!!`;
+    div.style.display = 'block';
+}
+
+// Ajuste na verificação inicial
+window.addEventListener('load', () => {
+    const nomeSalvo = localStorage.getItem('stilli_user_name');
+    const generoSalvo = localStorage.getItem('stilli_user_gender');
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (nomeSalvo) {
+        // Agora passa o gênero salvo também
+        exibirSaudacao(nomeSalvo, generoSalvo || 'M'); 
+    } 
+    else if (isInstalled) {
+        document.getElementById('welcome-overlay').style.display = 'flex';
+    }
+
+   let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+
+// Captura o evento de instalação do navegador
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Impede o prompt padrão automático
+    e.preventDefault();
+    // Armazena o evento para ser disparado pelo nosso botão
+    deferredPrompt = e;
+    // Mostra o seu banner personalizado
+    if (installBanner) {
+        installBanner.style.display = 'flex';
+    }
+});
+
+// Ação do Botão "INSTALAR AGORA"
+document.getElementById('btn-install-now').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Dispara o prompt nativo de instalação diretamente
+        deferredPrompt.prompt();
+        
+        // Verifica a escolha do usuário
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('Usuário aceitou a instalação');
         }
+        
+        // Limpa o prompt para não ser usado novamente
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+    } else {
+        // Caso o evento ainda não tenha sido disparado pelo navegador
+        console.log('O prompt de instalação ainda não está pronto.');
+    }
+});
 
-        function exibirSaudacao(nome) {
-            const div = document.getElementById('saudacao-usuario');
-            div.innerHTML = `Olá, <b>${nome}</b> seja bem vindo 🥳`;
-            div.style.display = 'block';
-        }
+// Ação do Botão "AGORA NÃO"
+document.getElementById('btn-not-now').addEventListener('click', () => {
+    installBanner.style.display = 'none';
+});
 
-        window.addEventListener('load', () => {
-            const nomeSalvo = localStorage.getItem('stilli_user_name');
-            const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-            // Se já tem nome salvo, mostra a saudação direto
-            if (nomeSalvo) {
-                exibirSaudacao(nomeSalvo);
-            } 
-            // Se o app foi ABERTO pelo ícone instalado e não tem nome, pede o nome
-            else if (isInstalled) {
-                document.getElementById('welcome-overlay').style.display = 'flex';
-            }
-
-            // Lógica do Banner de Instalação (PWA)
-            let deferredPrompt;
-            const installBanner = document.getElementById('install-banner');
-
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Só mostra o banner se ainda não estiver instalado
-                if (!isInstalled) {
-                    installBanner.style.display = 'flex';
-                }
-            });
-
-            document.getElementById('btn-install-now').addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        installBanner.style.display = 'none';
-                    }
-                    deferredPrompt = null;
-                }
-            });
-
+// Esconde o banner se a instalação for concluída com sucesso
+window.addEventListener('appinstalled', () => {
+    installBanner.style.display = 'none';
+    deferredPrompt = null;
+});
+    
             document.getElementById('btn-not-now').addEventListener('click', () => {
                 installBanner.style.display = 'none';
             });
