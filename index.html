@@ -828,51 +828,6 @@ async function executarBuscaLocal(input, nomeLivro) {
             input.focus();    // Deixa o cursor piscando no campo pronto para digitar de novo
         }
 
-        let deferredPrompt;
-
-// 1. Escuta o navegador perguntando se pode instalar
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Impede o navegador de mostrar o prompt padrão feio
-    e.preventDefault();
-    // Guarda o evento para usar depois
-    deferredPrompt = e;
-    // Mostra o SEU banner bonito
-    const banner = document.getElementById('install-banner');
-    if (banner) {
-        banner.style.display = 'flex';
-    }
-});
-
-document.getElementById('btn-install-now').addEventListener('click', async () => {
-    if (window.deferredPrompt) {
-        // 1. Mostra a caixa do sistema (Android/Windows)
-        window.deferredPrompt.prompt();
-        
-        // 2. Captura a decisão IMEDIATAMENTE
-        const { outcome } = await window.deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            // 🎯 MUDANÇA VISUAL IMEDIATA
-            const banner = document.getElementById('install-banner');
-            const msgSpan = banner.querySelector('span');
-            const botoes = banner.querySelector('.banner-buttons');
-
-            // Troca o texto e aplica a classe de piscar
-            msgSpan.innerHTML = "🚀 AGUARDE... INSTALANDO NO SEU CELULAR";
-            msgSpan.className = "installing-active";
-
-            // Some com os botões para o banner ficar limpo só com a mensagem
-            if (botoes) botoes.style.display = 'none';
-            
-            console.log('Usuário aceitou. Aviso "Instalando" ativado.');
-        } else {
-            // Se ele recusou, o banner some
-            document.getElementById('install-banner').style.display = 'none';
-        }
-        window.deferredPrompt = null;
-    }
-});
-
 // 3. Ação do Botão "AGORA NÃO"
 document.getElementById('btn-not-now').addEventListener('click', () => {
     document.getElementById('install-banner').style.display = 'none';
@@ -916,7 +871,7 @@ function exibirSaudacao(nome, genero) {
     div.style.display = 'block';
 }
 
-// Ajuste na verificação inicial e lógica de instalação unificada
+        // ÚNICO BLOCO DE INICIALIZAÇÃO
 window.addEventListener('load', () => {
     const nomeSalvo = localStorage.getItem('stilli_user_name');
     const generoSalvo = localStorage.getItem('stilli_user_gender');
@@ -928,43 +883,52 @@ window.addEventListener('load', () => {
         document.getElementById('welcome-overlay').style.display = 'flex';
     }
 
-    // Gerenciamento do Banner de Instalação (Sem duplicidade)
     const installBanner = document.getElementById('install-banner');
     
+    // Captura o evento de instalação globalmente
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
-        window.deferredPrompt = e; // Usamos window para garantir escopo global
-        if (installBanner) installBanner.style.display = 'flex';
+        window.deferredPrompt = e;
+        if (installBanner && !isInstalled) installBanner.style.display = 'flex';
     });
 
-    document.getElementById('btn-install-now').addEventListener('click', async () => {
-        if (window.deferredPrompt) {
-            window.deferredPrompt.prompt();
-            const { outcome } = await window.deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                const msgArea = installBanner.querySelector('span');
-                const btnArea = installBanner.querySelector('.banner-buttons');
+    // Lógica do botão de instalação (Apenas esta versão deve existir)
+    const btnInstall = document.getElementById('btn-install-now');
+    if (btnInstall) {
+        btnInstall.addEventListener('click', async () => {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                const { outcome } = await window.deferredPrompt.userChoice;
                 
-                msgArea.innerHTML = "🚀 Instalando Bíblia Sagrada... aguarde.";
-                msgArea.className = "installing-text";
-                if (btnArea) btnArea.style.display = 'none';
-            } else {
-                installBanner.style.display = 'none';
+                if (outcome === 'accepted') {
+                    const msgArea = installBanner.querySelector('span');
+                    const btnArea = installBanner.querySelector('.banner-buttons');
+                    
+                    // Ativa o aviso permanente
+                    msgArea.innerHTML = "🚀 AGUARDE... INSTALANDO NO SEU CELULAR";
+                    msgArea.className = "installing-active";
+                    if (btnArea) btnArea.style.display = 'none';
+                } else {
+                    installBanner.style.display = 'none';
+                }
+                window.deferredPrompt = null;
             }
-            window.deferredPrompt = null;
-        }
-    });
+        });
+    }
 
-    document.getElementById('btn-not-now').addEventListener('click', () => {
-        if (installBanner) installBanner.style.display = 'none';
-    });
+    // Botão "Agora Não"
+    const btnNotNow = document.getElementById('btn-not-now');
+    if (btnNotNow) {
+        btnNotNow.addEventListener('click', () => {
+            installBanner.style.display = 'none';
+        });
+    }
 
+    // Evento final de conclusão
     window.addEventListener('appinstalled', () => {
-    // Só fecha o banner aqui, quando o Android confirmar que o ícone foi criado
-    const banner = document.getElementById('install-banner');
-    if (banner) banner.style.display = 'none';
-    alert("Instalação Concluída! Busque o ícone do Leão nos seus aplicativos.");
+        if (installBanner) installBanner.style.display = 'none';
+        alert("Instalação Concluída! Busque o ícone do Leão nos seus aplicativos.");
+    });
 });
 
     </script>
