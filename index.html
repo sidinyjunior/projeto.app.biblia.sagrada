@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V42 -->
+    <!-- V43 -->
     <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <title>Projeto Stille Holy Bible</title>
     
@@ -856,63 +856,43 @@ window.addEventListener('load', () => {
         document.getElementById('welcome-overlay').style.display = 'flex';
     }
 
-   let deferredPrompt;
+    
+  // --- LÓGICA DE INSTALAÇÃO PWA (CONSOLIDADA E LIMPA) ---
+let deferredPrompt;
 const installBanner = document.getElementById('install-banner');
 
-// Captura o evento de instalação do navegador
+// 1. Escuta o evento de instalação
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Impede o prompt padrão automático
     e.preventDefault();
-    // Armazena o evento para ser disparado pelo nosso botão
     deferredPrompt = e;
-    // Mostra o seu banner personalizado
-    if (installBanner) {
-        installBanner.style.display = 'flex';
+    // Mostra o banner apenas se não estiver em modo standalone
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+        if (installBanner) installBanner.style.display = 'flex';
     }
 });
 
-// Ação do Botão "INSTALAR AGORA"
+// 2. Botão Instalar Agora
 document.getElementById('btn-install-now').addEventListener('click', async () => {
     if (deferredPrompt) {
-        // Dispara o prompt nativo de instalação diretamente
         deferredPrompt.prompt();
-        
-        // Verifica a escolha do usuário
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            console.log('Usuário aceitou a instalação');
-        }
-        
-        // Limpa o prompt para não ser usado novamente
+        console.log(`Escolha do usuário: ${outcome}`);
         deferredPrompt = null;
         installBanner.style.display = 'none';
-    } else {
-        // Caso o evento ainda não tenha sido disparado pelo navegador
-        console.log('O prompt de instalação ainda não está pronto.');
     }
 });
 
-// Ação do Botão "AGORA NÃO"
+// 3. Botão Agora Não
 document.getElementById('btn-not-now').addEventListener('click', () => {
-    installBanner.style.display = 'none';
+    if (installBanner) installBanner.style.display = 'none';
 });
 
-// Esconde o banner se a instalação for concluída com sucesso
+// 4. Finalização da Instalação
 window.addEventListener('appinstalled', () => {
-    installBanner.style.display = 'none';
+    if (installBanner) installBanner.style.display = 'none';
     deferredPrompt = null;
+    console.log('Bíblia instalada com sucesso!');
 });
-    
-            document.getElementById('btn-not-now').addEventListener('click', () => {
-                installBanner.style.display = 'none';
-            });
-            
-            // Esconde o banner se a instalação for concluída
-            window.addEventListener('appinstalled', () => {
-                installBanner.style.display = 'none';
-                console.log('PWA instalado com sucesso!');
-            });
-        });
 
     </script>
 </body>
