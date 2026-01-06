@@ -107,19 +107,24 @@
         .search-item-text { color: #666; font-size: 0.9rem; line-height: 1.4; }
         .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
 
-.local-search-results {
-    grid-column: 1 / -1 !important; /* Força ocupar da coluna 1 até a última */
+        .local-search-results {
+    grid-column: 1 / span 5 !important; /* Força ocupar as 5 colunas do grid */
     width: 100% !important;
     background: rgba(242, 147, 37, 0.15);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 15px;
     margin-top: 10px;
+    margin-bottom: 10px;
     max-height: 250px;
     overflow-y: auto;
     display: none;
     border: 1px dashed var(--primary);
-    box-sizing: border-box; /* Importante para o padding não empurrar a borda */
+    box-sizing: border-box;
+    /* Garante que o box empurre os capítulos para baixo e não fique "esmagado" */
+    position: relative; 
+    z-index: 5;
 }
+
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }
 
@@ -225,6 +230,14 @@
 }
 .gender-option span { 
     letter-spacing: 1px; 
+}
+
+        /* Destaque temporário vindo da busca */
+.highlight-busca {
+    background-color: rgba(246, 209, 41, 0.4) !important; /* Amarelo Stilli */
+    border-left: 5px solid var(--primary);
+    padding-left: 8px;
+    border-radius: 4px;
 }
 
     </style>
@@ -477,30 +490,38 @@ window.addEventListener('load', () => {
             const grid = btn.nextElementSibling;
             const isVisible = grid.style.display === "grid";
             document.querySelectorAll('.capitulos-grid').forEach(g => g.style.display = 'none');
-            
+
             if (!isVisible) {
-                grid.innerHTML = "";
-                const innerSearch = document.createElement('div');
-                innerSearch.className = 'inner-search-container';
-                innerSearch.innerHTML = `
+            grid.innerHTML = "";
+            
+            // Criamos um container que abraça a busca e o resultado para garantir a largura
+            const searchWrapper = document.createElement('div');
+            searchWrapper.style.gridColumn = "1 / span 5"; // O "pulo do gato" está aqui
+            searchWrapper.className = "search-wrapper-local";
+            
+            searchWrapper.innerHTML = `
+                <div class="inner-search-container">
                     <input type="text" class="inner-search-input" 
                            placeholder="Buscar em ${livro}..." 
                            onkeyup="executarBuscaLocal(this, '${livro}')">
-                    <div class="local-search-results" id="local-results-${livro}"></div>
-                `;
-                grid.appendChild(innerSearch);
+                </div>
+                <div class="local-search-results" id="local-results-${livro}"></div>
+            `;
+            
+            grid.appendChild(searchWrapper);
 
-                for (let i = 1; i <= total; i++) {
-                    const btnCap = document.createElement('div');
-                    btnCap.className = 'btn-cap';
-                    btnCap.innerText = i;
-                    btnCap.onclick = () => abrirLeitor(livro, i);
-                    grid.appendChild(btnCap);
-                }
-                grid.style.display = "grid";
+            // Adiciona os botões de capítulos logo abaixo
+            for (let i = 1; i <= total; i++) {
+                const btnCap = document.createElement('div');
+                btnCap.className = 'btn-cap';
+                btnCap.innerText = i;
+                btnCap.onclick = () => abrirLeitor(livro, i);
+                grid.appendChild(btnCap);
             }
+            grid.style.display = "grid";
         }
 
+            
         async function fetchBibleData(versao) {
             if (BIBLE_CACHE[versao]) return BIBLE_CACHE[versao];
             const url = `https://raw.githubusercontent.com/sidinyjunior/projeto.app.biblia.sagrada/main/${versao}.json`;
@@ -530,18 +551,27 @@ window.addEventListener('load', () => {
                 
                 document.getElementById('reader-title').innerText = `${contexto.livro} ${contexto.cap}`;
 
-                cont.innerHTML = versos.map((v, i) => {
-                    const corSalva = localStorage.getItem(`mark_${contexto.livro}_${contexto.cap}_${i}`);
-                    const classeCor = corSalva ? `mark-${corSalva}` : '';
-                    return `<div class="verse-row ${classeCor}" onclick="compararVerso(${i})">
-                                <span class="verse-num">${i+1}</span>${v}
-                            </div>`;
-                }).join('');
+          cont.innerHTML = versos.map((v, i) => {
+    const corSalva = localStorage.getItem(`mark_${contexto.livro}_${contexto.cap}_${i}`);
+    let classeCor = corSalva ? `mark-${corSalva}` : '';
+    
+    // VERIFICAÇÃO DE DESTAQUE DA BUSCA:
+    // Se este for o verso vindo da busca, adicionamos uma classe temporária
+    if (window.versoParaDestacar === i) {
+        classeCor += ' highlight-busca';
+    }
 
-                cont.scrollTop = 0;
-                renderBotoesNavegacao();
-            } catch (e) { console.error(e); cont.innerHTML = "Erro ao carregar texto."; }
-        }
+    return `<div id="verso-${i}" class="verse-row ${classeCor}" onclick="compararVerso(${i})">
+                <span class="verse-num">${i+1}</span>${v}
+            </div>`;
+}).join('');
+
+// Após carregar, se houver destaque, limpa a variável e faz o scroll até ele
+if (window.versoParaDestacar !== undefined) {
+    const el = document.getElementById(`verso-${window.versoParaDestacar}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.versoParaDestacar = undefined; // Limpa para não destacar sempre
+}
 
         function renderBotoesNavegacao() {
             const footer = document.getElementById('reader-footer-ctrl');
@@ -706,7 +736,7 @@ window.addEventListener('load', () => {
         } else {
             const regexHighlight = new RegExp(`(${termo})`, 'gi');
             container.innerHTML = resultados.map(r => {
-                return `<div class="search-item-box" onclick="irParaVersiculo('${r.livro}', ${r.cap})">
+                return `<div class="search-item-box" onclick="irParaVersiculo('${r.livro}', ${r.cap}, ${r.verso})">
                             <span class="search-item-ref">${r.livro} ${r.cap}:${r.verso}</span>
                             <div class="search-item-text">${r.texto.replace(regexHighlight, "<b>$1</b>")}</div>
                         </div>`;
@@ -716,7 +746,11 @@ window.addEventListener('load', () => {
 }
 
   
-        function irParaVersiculo(livro, cap) { fecharBusca(); abrirLeitor(livro, cap); }
+    function irParaVersiculo(livro, cap, versoIdx) { 
+    fecharBusca(); 
+    window.versoParaDestacar = versoIdx - 1; // Subtraímos 1 pois o array começa em 0
+    abrirLeitor(livro, cap); 
+}
 
     async function executarBuscaLocal(input, nomeLivro) {
     const termo = input.value.trim();
@@ -751,7 +785,7 @@ window.addEventListener('load', () => {
             container.style.display = "block";
             const regexHighlight = new RegExp(`(${termo})`, 'gi');
             container.innerHTML = encontrados.map(e => `
-                <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
+                <div class="local-search-item" onclick="irParaVersiculo('${nomeLivro}', ${e.cap}, ${e.verso})">
                     <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regexHighlight, "<b>$1</b>")}
                 </div>`).join('');
         } else { 
@@ -891,28 +925,6 @@ document.getElementById('btn-install-now').addEventListener('click', async () =>
         console.log('O prompt de instalação ainda não está pronto.');
     }
 });
-
-// Ação do Botão "AGORA NÃO"
-document.getElementById('btn-not-now').addEventListener('click', () => {
-    installBanner.style.display = 'none';
-});
-
-// Esconde o banner se a instalação for concluída com sucesso
-window.addEventListener('appinstalled', () => {
-    installBanner.style.display = 'none';
-    deferredPrompt = null;
-});
-    
-            document.getElementById('btn-not-now').addEventListener('click', () => {
-                installBanner.style.display = 'none';
-            });
-            
-            // Esconde o banner se a instalação for concluída
-            window.addEventListener('appinstalled', () => {
-                installBanner.style.display = 'none';
-                console.log('PWA instalado com sucesso!');
-            });
-        });
 
     </script>
 </body>
