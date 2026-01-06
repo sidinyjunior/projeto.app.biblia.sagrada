@@ -65,7 +65,7 @@
         .verse-row { margin-bottom: 12px; display: block; cursor: pointer; }
         .verse-num { font-weight: bold; color: var(--nt-color); margin-right: 10px; font-size: 0.8em; }
 
-        .reader- { padding: 15px; display: flex; gap: 8px; background: #f9f9f9; border-top: 1px solid #ddd; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .reader-footer { padding: 15px; display: flex; gap: 8px; background: #f9f9f9; border-top: 1px solid #ddd; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
         .btn-nav-leitor { padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
         .btn-expand { flex: 2; background: var(--verde-sucesso); color: white; }
         .btn-side { flex: 0.6; background: #eee; color: #333; }
@@ -107,20 +107,20 @@
         .search-item-text { color: #666; font-size: 0.9rem; line-height: 1.4; }
         .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
 
-      .local-search-results {
-    /* Força a caixa a ocupar todas as colunas do grid */
-    grid-column: 1 / -1; 
-    background: rgba(242, 147, 37, 0.1); 
+.local-search-results {
+    display: none; /* Mantém escondido até pesquisar */
+    width: 100% !important;
+    grid-column: 1 / span 5 !important; /* Força ocupar as 5 colunas */
+    float: left; /* Ajuda a quebrar a rigidez do grid */
+    clear: both;
+    background: rgba(242, 147, 37, 0.15);
     border-radius: 10px;
-    padding: 15px; 
-    margin-top: 10px; 
-    max-height: 300px; 
+    padding: 15px;
+    margin-top: 10px;
+    max-height: 250px;
     overflow-y: auto;
-    display: none; 
     border: 1px dashed var(--primary);
-    /* Garante que o texto não fique colado nas bordas */
-    width: 100%;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }
