@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V34 -->
+    <!-- V35 -->
     <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <title>Projeto Stille Holy Bible</title>
     
@@ -856,30 +856,44 @@ window.addEventListener('load', () => {
         document.getElementById('welcome-overlay').style.display = 'flex';
     }
 
-            // Lógica do Banner de Instalação (PWA)
-            let deferredPrompt;
-            const installBanner = document.getElementById('install-banner');
+    let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
 
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Só mostra o banner se ainda não estiver instalado
-                if (!isInstalled) {
-                    installBanner.style.display = 'flex';
-                }
-            });
+// 1. Escuta o navegador perguntando se pode instalar
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Impede o prompt padrão
+    e.preventDefault();
+    // Guarda o evento
+    deferredPrompt = e;
+    // Mostra o banner
+    if (installBanner) installBanner.style.display = 'flex';
+    console.log("Evento PWA capturado e pronto.");
+});
 
-            document.getElementById('btn-install-now').addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        installBanner.style.display = 'none';
-                    }
-                    deferredPrompt = null;
-                }
-            });
+// 2. Ação do Botão "INSTALAR AGORA"
+document.getElementById('btn-install-now').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Usuário escolheu: ${outcome}`);
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+    } else {
+        alert("Para instalar, use a opção 'Adicionar à tela de início' no menu do seu navegador.");
+    }
+});
 
+// 3. Ação do Botão "AGORA NÃO"
+document.getElementById('btn-not-now').addEventListener('click', () => {
+    installBanner.style.display = 'none';
+});
+
+// Esconde o banner se a instalação for concluída por fora
+window.addEventListener('appinstalled', () => {
+    installBanner.style.display = 'none';
+    deferredPrompt = null;
+});
+    
             document.getElementById('btn-not-now').addEventListener('click', () => {
                 installBanner.style.display = 'none';
             });
