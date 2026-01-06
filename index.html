@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V45 -->
+    <!-- V46 -->
     <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <title>Projeto Stille Holy Bible</title>
     
@@ -249,6 +249,17 @@
         border-radius: 4px;
     }
 
+
+        @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+.installing-text {
+    animation: pulse 1.5s infinite;
+    font-weight: 800;
+}
+        
     </style>
 </head>
 <body>
@@ -823,18 +834,36 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
 });
 
-// 2. Ação do Botão "INSTALAR"
+// Ação do Botão "INSTALAR AGORA"
 document.getElementById('btn-install-now').addEventListener('click', async () => {
     if (deferredPrompt) {
-        // Mostra a caixa de confirmação oficial do navegador
+        // Dispara o prompt original do navegador
         deferredPrompt.prompt();
-        // Espera a escolha do usuário
+        
+        // Aguarda a escolha do usuário
         const { outcome } = await deferredPrompt.userChoice;
-        console.log(`Usuário escolheu: ${outcome}`);
-        // Limpa o evento pois ele só pode ser usado uma vez
+        
+        if (outcome === 'accepted') {
+            const banner = document.getElementById('install-banner');
+            const msgArea = banner.querySelector('span');
+            const btnArea = banner.querySelector('.banner-buttons');
+
+            // 1. Muda o texto da mensagem
+            msgArea.innerHTML = "🚀 Instalando Bíblia Sagrada... aguarde.";
+            
+            // 2. ADICIONA A CLASSE que cria a animação de piscar
+            msgArea.className = "installing-text";
+
+            // 3. Esconde os botões para não haver duplo clique
+            if (btnArea) btnArea.style.display = 'none';
+
+            console.log('Instalação aceita. Aguardando sinal do sistema...');
+        } else {
+            // Se o usuário recusar no prompt do Android/iOS, fecha o banner
+            document.getElementById('install-banner').style.display = 'none';
+        }
+        
         deferredPrompt = null;
-        // Esconde o banner
-        document.getElementById('install-banner').style.display = 'none';
     }
 });
 
@@ -913,46 +942,44 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // Ação do Botão "INSTALAR AGORA"
 document.getElementById('btn-install-now').addEventListener('click', async () => {
     if (deferredPrompt) {
-        // Dispara o prompt nativo de instalação diretamente
+        // Dispara o prompt nativo
         deferredPrompt.prompt();
         
-        // Verifica a escolha do usuário
         const { outcome } = await deferredPrompt.userChoice;
+        
         if (outcome === 'accepted') {
-            console.log('Usuário aceitou a instalação');
+            // 🎯 AQUI ESTÁ O SEGREDO:
+            // Em vez de fechar o banner, mudamos o visual dele para "Instalando..."
+            const banner = document.getElementById('install-banner');
+            const btnArea = banner.querySelector('.banner-buttons');
+            const msgArea = banner.querySelector('span');
+            
+            msgArea.innerHTML = "🚀 Instalando Bíblia Sagrada... aguarde.";
+            msgArea.style.color = "var(--verde-sucesso)";
+            
+            // Escondemos os botões para o usuário não clicar de novo
+            if (btnArea) btnArea.style.display = 'none';
+            
+            console.log('Usuário aceitou. Mantendo aviso de instalação...');
+        } else {
+            // Se ele cancelou no prompt do sistema, fechamos o banner
+            installBanner.style.display = 'none';
         }
         
-        // Limpa o prompt para não ser usado novamente
         deferredPrompt = null;
-        installBanner.style.display = 'none';
-    } else {
-        // Caso o evento ainda não tenha sido disparado pelo navegador
-        console.log('O prompt de instalação ainda não está pronto.');
     }
 });
 
-// Ação do Botão "AGORA NÃO"
-document.getElementById('btn-not-now').addEventListener('click', () => {
-    installBanner.style.display = 'none';
-});
-
-// Esconde o banner se a instalação for concluída com sucesso
+// 🎯 O FECHAMENTO REAL: Só acontece quando o sistema confirma que terminou
 window.addEventListener('appinstalled', () => {
-    installBanner.style.display = 'none';
-    deferredPrompt = null;
+    const installBanner = document.getElementById('install-banner');
+    if (installBanner) {
+        // Agora sim, removemos o banner da tela
+        installBanner.style.display = 'none';
+        console.log('Instalação concluída com sucesso. Banner removido.');
+    }
 });
     
-            document.getElementById('btn-not-now').addEventListener('click', () => {
-                installBanner.style.display = 'none';
-            });
-            
-            // Esconde o banner se a instalação for concluída
-            window.addEventListener('appinstalled', () => {
-                installBanner.style.display = 'none';
-                console.log('PWA instalado com sucesso!');
-            });
-        });
-
     </script>
 </body>
 </html>
