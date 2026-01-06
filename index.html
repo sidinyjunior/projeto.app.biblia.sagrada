@@ -931,6 +931,13 @@ document.getElementById('btn-install-now').addEventListener('click', async () =>
     }
 });
 
+    
+        
+// Ação do Botão "AGORA NÃO"
+document.getElementById('btn-not-now').addEventListener('click', () => {
+    installBanner.style.display = 'none';
+});
+
     // Ativa o aviso permanente
                     msgArea.innerHTML = "🚀 AGUARDE... INSTALANDO NO SEU CELULAR";
                     msgArea.className = "installing-active";
@@ -941,11 +948,6 @@ document.getElementById('btn-install-now').addEventListener('click', async () =>
                 window.deferredPrompt = null;
             }
         
-// Ação do Botão "AGORA NÃO"
-document.getElementById('btn-not-now').addEventListener('click', () => {
-    installBanner.style.display = 'none';
-});
-
 // Esconde o banner se a instalação for concluída com sucesso
 window.addEventListener('appinstalled', () => {
     installBanner.style.display = 'none';
