@@ -910,76 +910,56 @@ function exibirSaudacao(nome, genero) {
     div.style.display = 'block';
 }
 
-// Ajuste na verificação inicial
+// Ajuste na verificação inicial e lógica de instalação unificada
 window.addEventListener('load', () => {
     const nomeSalvo = localStorage.getItem('stilli_user_name');
     const generoSalvo = localStorage.getItem('stilli_user_gender');
     const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
     if (nomeSalvo) {
-        // Agora passa o gênero salvo também
         exibirSaudacao(nomeSalvo, generoSalvo || 'M'); 
-    } 
-    else if (isInstalled) {
+    } else if (isInstalled) {
         document.getElementById('welcome-overlay').style.display = 'flex';
     }
 
-   let deferredPrompt;
-const installBanner = document.getElementById('install-banner');
-
-// Captura o evento de instalação do navegador
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Impede o prompt padrão automático
-    e.preventDefault();
-    // Armazena o evento para ser disparado pelo nosso botão
-    deferredPrompt = e;
-    // Mostra o seu banner personalizado
-    if (installBanner) {
-        installBanner.style.display = 'flex';
-    }
-});
-
-// Ação do Botão "INSTALAR AGORA"
-document.getElementById('btn-install-now').addEventListener('click', async () => {
-    if (deferredPrompt) {
-        // Dispara o prompt nativo
-        deferredPrompt.prompt();
-        
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            // 🎯 AQUI ESTÁ O SEGREDO:
-            // Em vez de fechar o banner, mudamos o visual dele para "Instalando..."
-            const banner = document.getElementById('install-banner');
-            const btnArea = banner.querySelector('.banner-buttons');
-            const msgArea = banner.querySelector('span');
-            
-            msgArea.innerHTML = "🚀 Instalando Bíblia Sagrada... aguarde.";
-            msgArea.style.color = "var(--verde-sucesso)";
-            
-            // Escondemos os botões para o usuário não clicar de novo
-            if (btnArea) btnArea.style.display = 'none';
-            
-            console.log('Usuário aceitou. Mantendo aviso de instalação...');
-        } else {
-            // Se ele cancelou no prompt do sistema, fechamos o banner
-            installBanner.style.display = 'none';
-        }
-        
-        deferredPrompt = null;
-    }
-});
-
-// 🎯 O FECHAMENTO REAL: Só acontece quando o sistema confirma que terminou
-window.addEventListener('appinstalled', () => {
+    // Gerenciamento do Banner de Instalação (Sem duplicidade)
     const installBanner = document.getElementById('install-banner');
-    if (installBanner) {
-        // Agora sim, removemos o banner da tela
-        installBanner.style.display = 'none';
-        console.log('Instalação concluída com sucesso. Banner removido.');
-    }
-});
     
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e; // Usamos window para garantir escopo global
+        if (installBanner) installBanner.style.display = 'flex';
+    });
+
+    document.getElementById('btn-install-now').addEventListener('click', async () => {
+        if (window.deferredPrompt) {
+            window.deferredPrompt.prompt();
+            const { outcome } = await window.deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                const msgArea = installBanner.querySelector('span');
+                const btnArea = installBanner.querySelector('.banner-buttons');
+                
+                msgArea.innerHTML = "🚀 Instalando Bíblia Sagrada... aguarde.";
+                msgArea.className = "installing-text";
+                if (btnArea) btnArea.style.display = 'none';
+            } else {
+                installBanner.style.display = 'none';
+            }
+            window.deferredPrompt = null;
+        }
+    });
+
+    document.getElementById('btn-not-now').addEventListener('click', () => {
+        if (installBanner) installBanner.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+        if (installBanner) installBanner.style.display = 'none';
+        console.log('App instalado com sucesso!');
+    });
+});
+
     </script>
 </body>
 </html>
