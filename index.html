@@ -107,12 +107,21 @@
         .search-item-text { color: #666; font-size: 0.9rem; line-height: 1.4; }
         .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
 
-        /* Busca Local dentro do Grid de Capítulos */
-        .local-search-results {
-            grid-column: span 5; background: rgba(242, 147, 37, 0.1); border-radius: 10px;
-            padding: 10px; margin-top: 10px; max-height: 250px; overflow-y: auto;
-            display: none; border: 1px dashed var(--primary);
-        }
+      .local-search-results {
+    /* Força a caixa a ocupar todas as colunas do grid */
+    grid-column: 1 / -1; 
+    background: rgba(242, 147, 37, 0.1); 
+    border-radius: 10px;
+    padding: 15px; 
+    margin-top: 10px; 
+    max-height: 300px; 
+    overflow-y: auto;
+    display: none; 
+    border: 1px dashed var(--primary);
+    /* Garante que o texto não fique colado nas bordas */
+    width: 100%;
+    box-sizing: border-box; 
+}
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }
 
@@ -656,7 +665,7 @@ window.addEventListener('load', () => {
         document.getElementById('bibliaSearch').addEventListener('keypress', (e) => { if (e.key === 'Enter') executarBuscaGlobal(e.target.value); });
 
         async function executarBuscaGlobal(termo) {
-            if (termo.length < 3) { alert("Digite pelo menos 3 letras."); return; }
+            if (termo.length < 2) { alert("Digite pelo menos 2 letras."); return; }
             const overlay = document.getElementById('search-overlay');
             const container = document.getElementById('search-results');
             const termDisplay = document.getElementById('search-term-display');
@@ -705,7 +714,7 @@ window.addEventListener('load', () => {
             const termo = input.value.trim();
             const termoLimpo = limparTexto(termo);
             const container = input.nextElementSibling;
-            if (termoLimpo.length < 3) { container.style.display = "none"; return; }
+            if (termoLimpo.length < 2) { container.style.display = "none"; return; }
             try {
                 const data = await fetchBibleData(contexto.versao);
                 let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
