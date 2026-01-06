@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V40 -->
+    <!-- V45 -->
     <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <title>Projeto Stille Holy Bible</title>
     
@@ -53,8 +53,25 @@
         .btn-livro { width: 100%; padding: 16px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 8px; text-align: center; }
         .capitulos-grid { display: none; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 15px; }
         .btn-cap { padding: 12px 0; background: #333; color: white; border: 1px solid #444; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; }
-        .inner-search-container { display: flex; background: #fff; border-radius: 20px; margin-bottom: 15px; padding: 5px 12px; align-items: center; width: 100%; box-sizing: border-box; grid-column: span 5; }
-        .inner-search-input { flex: 1; border: none; padding: 8px; font-size: 0.9rem; outline: none; background: transparent; color: #000; }
+        .inner-search-container {
+    grid-column: 1 / -1 !important;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    margin-bottom: 15px;
+    width: 100%;
+}
+        .inner-search-input {
+    width: 100%;
+    background: #fff;
+    border-radius: 20px;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    outline: none;
+    border: none;
+    color: #000;
+    box-sizing: border-box;
+}
 
         #reader-overlay { position: fixed; inset: 0; background: var(--bg-leitor); z-index: 5000; display: none; flex-direction: column; color: var(--texto-leitor); }
         .theme-sepia { --bg-leitor: #f4ecd8 !important; --texto-leitor: #5b4636 !important; }
@@ -107,18 +124,18 @@
         .search-item-text { color: #666; font-size: 0.9rem; line-height: 1.4; }
         .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
 
+/* Resultados ocupam a largura toda do grid */
 .local-search-results {
-    grid-column: 1 / -1 !important; /* Força ocupar da coluna 1 até a última */
+    grid-column: 1 / -1 !important;
     width: 100% !important;
-    background: rgba(242, 147, 37, 0.15);
-    border-radius: 10px;
-    padding: 15px;
+    background: rgba(242, 147, 37, 0.1);
+    border-radius: 12px;
     margin-top: 10px;
     max-height: 250px;
     overflow-y: auto;
     display: none;
     border: 1px dashed var(--primary);
-    box-sizing: border-box; /* Importante para o padding não empurrar a borda */
+    box-sizing: border-box;
 }
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }
@@ -185,9 +202,6 @@
     border-bottom: 2px solid var(--primary);
 }
 
-        
-
-
 .banner-buttons { 
     display: flex; 
     gap: 15px; /* Espaço entre os botões */
@@ -226,6 +240,14 @@
 .gender-option span { 
     letter-spacing: 1px; 
 }
+
+/* 🎯 Destaque do verso encontrado */
+ .highlight-verso {
+        background-color: rgba(241, 196, 15, 0.4) !important;
+        border-left: 5px solid var(--primary);
+        padding-left: 10px;
+        border-radius: 4px;
+    }
 
     </style>
 </head>
@@ -473,33 +495,39 @@ window.addEventListener('load', () => {
             });
         }
 
-        function toggleCapitulos(livro, total, btn) {
-            const grid = btn.nextElementSibling;
-            const isVisible = grid.style.display === "grid";
-            document.querySelectorAll('.capitulos-grid').forEach(g => g.style.display = 'none');
-            
-            if (!isVisible) {
-                grid.innerHTML = "";
-                const innerSearch = document.createElement('div');
-                innerSearch.className = 'inner-search-container';
-                innerSearch.innerHTML = `
-                    <input type="text" class="inner-search-input" 
-                           placeholder="Buscar em ${livro}..." 
-                           onkeyup="executarBuscaLocal(this, '${livro}')">
-                    <div class="local-search-results" id="local-results-${livro}"></div>
-                `;
-                grid.appendChild(innerSearch);
+     function toggleCapitulos(livro, total, btn) {
+    const grid = btn.nextElementSibling;
+    const isVisible = grid.style.display === "grid";
+    document.querySelectorAll('.capitulos-grid').forEach(g => g.style.display = 'none');
+    
+    if (!isVisible) {
+        grid.innerHTML = "";
+        
+        // Criamos o bloco de busca que ocupará o topo do box
+        const searchBlock = document.createElement('div');
+        searchBlock.className = 'inner-search-container';
+        searchBlock.innerHTML = `
+            <input type="text" class="inner-search-input" 
+                   placeholder="Buscar em ${livro}..." 
+                   onkeyup="executarBuscaLocal(this, '${livro}')">
+            <div class="local-search-results"></div>
+        `;
+        grid.appendChild(searchBlock);
 
-                for (let i = 1; i <= total; i++) {
-                    const btnCap = document.createElement('div');
-                    btnCap.className = 'btn-cap';
-                    btnCap.innerText = i;
-                    btnCap.onclick = () => abrirLeitor(livro, i);
-                    grid.appendChild(btnCap);
-                }
-                grid.style.display = "grid";
-            }
+        // Depois injetamos os capítulos logo abaixo
+        for (let i = 1; i <= total; i++) {
+            const btnCap = document.createElement('div');
+            btnCap.className = 'btn-cap';
+            btnCap.innerText = i;
+            btnCap.onclick = () => {
+                window.versoParaDestacar = null; // Limpa destaque ao clicar direto no cap
+                abrirLeitor(livro, i);
+            };
+            grid.appendChild(btnCap);
         }
+        grid.style.display = "grid";
+    }
+}
 
         async function fetchBibleData(versao) {
             if (BIBLE_CACHE[versao]) return BIBLE_CACHE[versao];
@@ -518,31 +546,44 @@ window.addEventListener('load', () => {
 
         const limparTexto = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-        async function carregarTexto() {
-            const cont = document.getElementById('reader-text');
-            cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando escrituras...</p>";
-            try {
-                const data = await fetchBibleData(contexto.versao);
-                let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
-                const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(contexto.livro));
-                const capítulos = lData.chapters || lData.capitulos;
-                const versos = capítulos[contexto.cap - 1];
-                
-                document.getElementById('reader-title').innerText = `${contexto.livro} ${contexto.cap}`;
+     // Atualização no carregarTexto para aplicar o destaque e o scroll
+async function carregarTexto() {
+    const cont = document.getElementById('reader-text');
+    cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando escrituras...</p>";
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(contexto.livro));
+        const capítulos = lData.chapters || lData.capitulos;
+        const versos = capítulos[contexto.cap - 1];
+        
+        document.getElementById('reader-title').innerText = `${contexto.livro} ${contexto.cap}`;
 
-                cont.innerHTML = versos.map((v, i) => {
-                    const corSalva = localStorage.getItem(`mark_${contexto.livro}_${contexto.cap}_${i}`);
-                    const classeCor = corSalva ? `mark-${corSalva}` : '';
-                    return `<div class="verse-row ${classeCor}" onclick="compararVerso(${i})">
-                                <span class="verse-num">${i+1}</span>${v}
-                            </div>`;
-                }).join('');
+        cont.innerHTML = versos.map((v, i) => {
+            const corSalva = localStorage.getItem(`mark_${contexto.livro}_${contexto.cap}_${i}`);
+            const classeCor = corSalva ? `mark-${corSalva}` : '';
+            
+            // VERIFICA SE ESTE É O VERSO DA BUSCA PARA DESTACAR
+            const destaque = (window.versoParaDestacar === i) ? 'highlight-verso' : '';
 
-                cont.scrollTop = 0;
-                renderBotoesNavegacao();
-            } catch (e) { console.error(e); cont.innerHTML = "Erro ao carregar texto."; }
+            return `<div id="v-${i}" class="verse-row ${classeCor} ${destaque}" onclick="compararVerso(${i})">
+                        <span class="verse-num">${i+1}</span>${v}
+                    </div>`;
+        }).join('');
+
+        // ROLA ATÉ O VERSO DESTACADO
+        if (window.versoParaDestacar !== null) {
+            setTimeout(() => {
+                const el = document.getElementById(`v-${window.versoParaDestacar}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
         }
 
+        cont.scrollTop = 0;
+        renderBotoesNavegacao();
+    } catch (e) { console.error(e); cont.innerHTML = "Erro ao carregar texto."; }
+}
+        
         function renderBotoesNavegacao() {
             const footer = document.getElementById('reader-footer-ctrl');
             footer.innerHTML = "";
@@ -718,10 +759,11 @@ window.addEventListener('load', () => {
   
         function irParaVersiculo(livro, cap) { fecharBusca(); abrirLeitor(livro, cap); }
 
-    async function executarBuscaLocal(input, nomeLivro) {
+ // Alterado para passar o verso e salvar no "destaque"
+async function executarBuscaLocal(input, nomeLivro) {
     const termo = input.value.trim();
     const termoLimpo = limparTexto(termo);
-    const container = input.nextElementSibling;
+    const container = input.nextElementSibling; // Pega a div local-search-results
     
     if (termoLimpo.length < 2) { container.style.display = "none"; return; }
     
@@ -732,16 +774,13 @@ window.addEventListener('load', () => {
         const capitulos = lData.chapters || lData.capitulos;
         let encontrados = [];
 
-        // Criamos uma regra: se a palavra tiver 2 ou 3 letras, buscamos apenas a palavra exata
-        // O \b garante que não pegue partes de outras palavras
         const regexBusca = (termoLimpo.length <= 3) 
             ? new RegExp(`\\b${termoLimpo}\\b`, 'gi') 
             : new RegExp(`${termoLimpo}`, 'gi');
 
         capitulos.forEach((versos, cIdx) => {
             versos.forEach((vTexto, vIdx) => {
-                const textoNormalizado = limparTexto(vTexto);
-                if (regexBusca.test(textoNormalizado)) {
+                if (regexBusca.test(limparTexto(vTexto))) {
                     encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
                 }
             });
@@ -751,12 +790,12 @@ window.addEventListener('load', () => {
             container.style.display = "block";
             const regexHighlight = new RegExp(`(${termo})`, 'gi');
             container.innerHTML = encontrados.map(e => `
-                <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
+                <div class="local-search-item" onclick="window.versoParaDestacar=${e.verso-1}; abrirLeitor('${nomeLivro}', ${e.cap})">
                     <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regexHighlight, "<b>$1</b>")}
                 </div>`).join('');
         } else { 
             container.style.display = "block"; 
-            container.innerHTML = "<div style='padding:10px;'>Nada encontrado com essa palavra exata.</div>"; 
+            container.innerHTML = "<div style='padding:10px;'>Nada encontrado.</div>"; 
         }
     } catch (e) { console.error(e); }
 }
