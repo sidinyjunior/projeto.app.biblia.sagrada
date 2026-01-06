@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V41 -->
+    <!-- V42 -->
     <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <title>Projeto Stille Holy Bible</title>
     
@@ -12,6 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/icone_leao_biblia_app.png">
 
+    
     <style>
         :root {
             --primary: #F29325;
@@ -29,69 +30,276 @@
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         .header { text-align: center; padding: 10px 0 0 0; width: 100%; }
-        .header img { width: 150px; border-radius: 20px; margin-bottom: -10px; }
-        .app-main-title { font-family: 'Advent Pro', sans-serif; color: #f6d129; font-size: 2.7rem; text-align: center; font-weight: 500; margin-bottom: 40px; }
-        
+        .header img { width: 150px; border-radius: 20px; margin-bottom: -10px; /* Aumentei um pouco para colar mais */}
         .container { width: 95%; max-width: 500px; flex: 1; display: flex; flex-direction: column; }
+
         .search-container { background:#fff; border-radius:25px; margin-bottom:20px; padding:5px 15px; display:flex; align-items:center; }
         #bibliaSearch { flex:1; border:none; padding:10px; outline:none; color:#000; font-size: 1rem; }
 
-        .biblia-box { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid #333; margin-bottom: 20px; }
+        .biblia-box { background: var(--card-bg); border-radius: 20px; padding: 20px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
         .testamento-selector { display: flex; gap: 10px; margin-bottom: 25px; width: 100%; }
         .btn-testamento { 
             flex: 1; padding: 15px 5px; border: none; cursor: pointer; border-radius: 12px; transition: 0.3s; opacity: 0.5; 
-            font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif;
+            white-space: nowrap; overflow: hidden; font-size: clamp(0.7rem, 3vw, 0.95rem); 
+            font-weight: 800; text-transform: uppercase; letter-spacing: -0.2px;
         }
         .btn-vt { background-color: var(--vt-color); color: #000080; }
         .btn-nt { background-color: var(--nt-color); color: #000080; }
         .btn-testamento.active { opacity: 1; transform: scale(1.02); }
 
         .subtitulo-elegante { font-family: 'Great Vibes', cursive; font-size: 2.2rem; margin: 25px 0 10px 0; text-align: center; width: 100%; }
-        .btn-livro { width: 100%; padding: 16px; border: none; border-radius: 10px; color: white; font-weight: bold; margin-bottom: 8px; cursor: pointer; }
+        .btn-livro { width: 100%; padding: 16px; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 8px; text-align: center; }
         .capitulos-grid { display: none; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 15px; }
-        .btn-cap { padding: 12px 0; background: #333; color: white; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; }
-        
-        /* CORREÇÃO LARGURA BUSCA LOCAL */
-        .search-wrapper-local { grid-column: 1 / span 5; width: 100%; }
-        .inner-search-container { display: flex; background: #fff; border-radius: 20px; margin-bottom: 10px; padding: 5px 12px; align-items: center; }
-        .inner-search-input { flex: 1; border: none; padding: 8px; font-size: 0.9rem; outline: none; color: #000; }
-        .local-search-results {
-            width: 100%; background: rgba(242, 147, 37, 0.15); border-radius: 12px; padding: 10px; 
-            display: none; border: 1px dashed var(--primary); max-height: 250px; overflow-y: auto; margin-bottom: 10px;
-        }
-        .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; }
+        .btn-cap { padding: 12px 0; background: #333; color: white; border: 1px solid #444; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; }
+        .inner-search-container { display: flex; background: #fff; border-radius: 20px; margin-bottom: 15px; padding: 5px 12px; align-items: center; width: 100%; box-sizing: border-box; grid-column: span 5; }
+        .inner-search-input { flex: 1; border: none; padding: 8px; font-size: 0.9rem; outline: none; background: transparent; color: #000; }
 
-        /* LEITOR E DESTAQUE */
         #reader-overlay { position: fixed; inset: 0; background: var(--bg-leitor); z-index: 5000; display: none; flex-direction: column; color: var(--texto-leitor); }
+        .theme-sepia { --bg-leitor: #f4ecd8 !important; --texto-leitor: #5b4636 !important; }
+        .theme-dark { --bg-leitor: #1a1a1a !important; --texto-leitor: #e0e0e0 !important; }
         .reader-header { padding: 10px 15px; background: var(--verde-escuro); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .reader-toolbar { display: flex; background: #245e41; padding: 8px 15px; gap: 10px; align-items: center; overflow-x: auto; }
         .reader-content { flex: 1; overflow-y: auto; padding: 20px; line-height: 1.8; }
-        .verse-row { margin-bottom: 12px; padding: 5px; border-radius: 4px; }
-        .highlight-busca { background-color: rgba(246, 209, 41, 0.4) !important; border-left: 5px solid var(--primary); padding-left: 10px; }
+        .verse-row { margin-bottom: 12px; display: block; cursor: pointer; }
+        .verse-num { font-weight: bold; color: var(--nt-color); margin-right: 10px; font-size: 0.8em; }
 
-        /* BANNER PWA */
-        #install-banner { display: none; position: fixed; top: 0; left: 0; right: 0; background: #fff; color: #333; padding: 15px; z-index: 10000; flex-direction: column; align-items: center; border-bottom: 2px solid var(--primary); }
+        .reader-footer { padding: 15px; display: flex; gap: 8px; background: #f9f9f9; border-top: 1px solid #ddd; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .btn-nav-leitor { padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
+        .btn-expand { flex: 2; background: var(--verde-sucesso); color: white; }
+        .btn-side { flex: 0.6; background: #eee; color: #333; }
+
+        #confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; }
+        #compare-modal { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 7000; padding: 20px; border-radius: 20px 20px 0 0; color: #333; max-height: 60vh; overflow-y: auto; }
+        .compare-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .compare-label { font-weight: bold; color: var(--verde-escuro); font-size: 0.8rem; text-transform: uppercase; }
+
+       footer { text-align: center; padding: 5px 20px 10px 20px; width: 100%; color: #7f8c8d; font-size: 0.8rem; }
+        /* Cores do Marca-texto */
+        .mark-yellow { background-color: rgba(241, 196, 15, 0.5) !important; color: #000 !important; border-radius: 4px; }
+        .mark-green { background-color: rgba(46, 204, 113, 0.5) !important; color: #000 !important; border-radius: 4px; }
+        .mark-blue { background-color: rgba(52, 152, 219, 0.5) !important; color: #000 !important; border-radius: 4px; }
+
+        .color-options { display: flex; gap: 10px; margin-top: 15px; justify-content: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .color-dot { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; }
+
+        /* --- NOVO VISUAL BUSCA GLOBAL (CARD DUPLO) --- */
+        #search-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 8000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .search-card {
+            background: white; width: 100%; max-width: 650px; height: 75vh; border-radius: 25px;
+            display: flex; flex-direction: row; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .search-left-side {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-right: 1px solid #eee; background: #fffaf5; padding: 20px; text-align: center;
+        }
+        #search-term-display { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--primary); text-transform: uppercase; word-break: break-all; }
+        
+        .search-results-side { flex: 1.6; display: flex; flex-direction: column; background: #fff; position: relative; }
+        .search-scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
+        .search-item-box { padding: 12px 8px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: 0.2s; }
+        .search-item-box:active { background: #f9f9f9; }
+        .search-item-ref { color: var(--primary); font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 4px; }
+        .search-item-text { color: #666; font-size: 0.9rem; line-height: 1.4; }
+        .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
+
+.local-search-results {
+    grid-column: 1 / -1 !important; /* Força ocupar da coluna 1 até a última */
+    width: 100% !important;
+    background: rgba(242, 147, 37, 0.15);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+    border: 1px dashed var(--primary);
+    box-sizing: border-box; /* Importante para o padding não empurrar a borda */
+}
+        .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
+        .local-search-item b { color: var(--amarelo); }
+
+
+        /* Botões Neutros da Barra de Busca (Lupa e Limpar) */
+        .search-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .btn-search-neutral {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: #333; /* Cor neutra grafite escuro */
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-search-neutral:active {
+            transform: scale(1.1);
+        }
+        .btn-limpar {
+            font-size: 1.1rem;
+            color: #999;
+            font-weight: bold;
+            margin-right: 2px;
+        }
+
+        /* Título Customizado (Advent Pro) */
+.app-main-title {
+    font-family: 'Advent Pro', sans-serif;
+    color: #f6d129;
+    font-size: 2.7rem; /* Tamanho ajustável */
+    text-align: center;
+    font-weight: 500;
+    
+    /* AJUSTES DE ESPAÇO - Mexa aqui para afastar ou aproximar */
+    margin-top: 0px;    /* Distância em relação ao Leão */
+    margin-bottom: 40px; /* Distância em relação à Pesquisa */
+}
+
+/* BANNER DE INSTALAÇÃO (Versão Slim, Reta e Centralizada) */
+#install-banner {
+    display: none; 
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    right: 0;
+    width: 100%;
+    background: #ffffff;
+    color: #333;
+    padding: 15px 0;
+    border-radius: 0; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--primary);
+}
+
+        
+
+
+.banner-buttons { 
+    display: flex; 
+    gap: 15px; /* Espaço entre os botões */
+    justify-content: center; 
+    width: auto; /* Não ocupa a largura toda */
+}
+
+.btn-pwa { 
+    padding: 8px 15px; /* Botões menores */
+    border: none; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    text-transform: uppercase; 
+    font-size: 0.7rem; /* Fonte menor */
+    min-width: 100px; /* Largura mínima padronizada */
+}
+
+#btn-install-now { background: var(--verde-sucesso); color: white; }
+#btn-not-now { background: #f0f0f0; color: #666; }
+
+.gender-option { 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    color: #fff; 
+    font-size: 0.85rem; 
+    font-weight: bold; 
+}
+.gender-option input[type="radio"] { 
+    accent-color: #f6d129; 
+    width: 18px; 
+    height: 18px; 
+}
+.gender-option span { 
+    letter-spacing: 1px; 
+}
+
     </style>
 </head>
 <body>
 
     <div id="install-banner">
-        <span style="font-weight: bold;">Instalar Bíblia Sagrada no Celular?</span>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button id="btn-not-now" style="padding:8px 15px; border-radius:8px; border:none;">AGORA NÃO</button>
-            <button id="btn-install-now" style="padding:8px 15px; border-radius:8px; border:none; background:var(--verde-sucesso); color:white; font-weight:bold;">INSTALAR</button>
-        </div>
+    <div style="text-align: center;">
+        <span style="font-size: 0.85rem; font-weight: bold; color: #333; display: block; margin-bottom: 5px;">
+            Instalar Bíblia Sagrada no Celular?
+        </span>
+    </div>
+    <div class="banner-buttons">
+        <button id="btn-not-now" class="btn-pwa">AGORA NÃO</button>
+        <button id="btn-install-now" class="btn-pwa">INSTALAR AGORA</button>
+    </div>
+</div>
+
+<div id="welcome-overlay" style="display: none; position: fixed; inset: 0; background: #000; z-index: 15000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <img src="assets/icone_leao_biblia_app.png" style="width: 140px; border-radius: 25px; margin-bottom: 25px; border: 2px solid #f6d129;">
+    <div class="app-main-title" style="font-size: 2.2rem; margin-bottom: 5px;">Muito bom ter você aqui</div>
+    <p style="color: #aaa; text-align: center; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif;">Como gostaria que te chamássemos?</p>
+    
+    <input type="text" id="userNameInput" placeholder="Digite nome e sobrenome preferido" style="width: 85%; max-width: 350px; padding: 18px; border-radius: 12px; border: 1px solid #f6d129; background: #1a1a1a; color: #fff; font-size: 1.1rem; text-align: center; outline: none; margin-bottom: 20px;">
+    
+    <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+        <label class="gender-option">
+            <input type="radio" name="userGender" value="M" checked>
+            <span>HOMEM</span>
+        </label>
+        <label class="gender-option">
+            <input type="radio" name="userGender" value="F">
+            <span>MULHER</span>
+        </label>
     </div>
 
-    <div class="header">
-        <img src="assets/icone_leao_biblia_app.png" alt="Logo">
-        <div class="app-main-title">Stilli Holy Bible</div>
-        <div id="saudacao-usuario" style="display:none;"></div>
+    <button onclick="salvarNomeUsuario()" style="width: 85%; max-width: 350px; padding: 15px; background: #f6d129; color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;">ENTRAR NO APP</button>
+</div>
+
+<div class="header">
+    <img src="assets/icone_leao_biblia_app.png" alt="Logo">
+    <div class="app-main-title">Stilli Holy Bible</div>
+    <div id="saudacao-usuario" style="text-align: center; color: #fff; margin-top: -10px; margin-bottom: 10px; font-size: 1.1rem; display: none; font-family: 'Segoe UI', sans-serif;"></div>
+</div>
+
+    <div id="confirm-overlay" onclick="fecharComparacao()"></div>
+
+    <div id="compare-modal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <strong id="compare-ref" style="color: var(--verde-escuro);">João 3:16</strong>
+            <div style="display:flex; gap:10px;">
+                <button onclick="compartilharVersiculo()" style="background:var(--azul-link); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem; cursor:pointer;">COMPARTILHAR 🚀</button>
+                <button onclick="fecharComparacao()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color: #999;">✕</button>
+            </div>
+        </div>
+        <div id="compare-list"></div>
+        <div class="color-options">
+            <div class="color-dot" style="background:#f1c40f;" onclick="marcarVersiculo('yellow')"></div>
+            <div class="color-dot" style="background:#2ecc71;" onclick="marcarVersiculo('green')"></div>
+            <div class="color-dot" style="background:#3498db;" onclick="marcarVersiculo('blue')"></div>
+            <div class="color-dot" style="background:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem;" onclick="marcarVersiculo('none')">🚫</div>
+        </div>
     </div>
 
     <div class="container">
         <div class="search-container">
-            <input type="text" id="bibliaSearch" placeholder="Pesquisar livro..." onkeyup="filtrarLivros()">
-        </div>
+    <input type="text" id="bibliaSearch" placeholder="Pesquisar em toda a Bíblia..." onkeyup="filtrarLivros()">
+    <div class="search-actions">
+        <button class="btn-search-neutral btn-limpar" onclick="limparBuscaPrincipal()">✕</button>
+        <button class="btn-search-neutral" onclick="executarBuscaGlobal(document.getElementById('bibliaSearch').value)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+    </div>
+</div>
+      
 
         <div class="biblia-box">
             <div class="testamento-selector">
@@ -104,13 +312,50 @@
 
     <div id="reader-overlay">
         <div class="reader-header">
-            <span id="reader-title" style="font-weight:bold;"></span>
-            <button onclick="fecharLeitor()" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
+            <span id="reader-title" style="font-weight:bold;">Gênesis 1</span>
+            <button onclick="fecharLeitor()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">✕</button>
+        </div>
+        <div class="reader-toolbar">
+            <select id="select-versao" onchange="trocarVersao(this.value)" style="background:white; border:none; border-radius:5px; padding:5px;">
+                <option value="acf">ACF</option>
+                <option value="nvi">NVI</option>
+                <option value="kja">KJA</option>
+                <option value="kjv">KJV</option>
+            </select>
+            <button id="btn-voz" onclick="alternarVoz()" style="background:var(--amarelo); border:none; border-radius:5px; padding:8px 12px; cursor:pointer;">▶️</button>
+            <button onclick="mudarFonte(0.1)" style="background:var(--verde-escuro); color:white; border:none; border-radius:5px; padding:8px 12px; cursor:pointer;">A+</button>
+            <button onclick="mudarFonte(-0.1)" style="background:var(--verde-escuro); color:white; border:none; border-radius:5px; padding:8px 12px; cursor:pointer;">A-</button>
+            <button onclick="setTema('sepia')" style="background:#f4ecd8; border:none; border-radius:5px; padding:8px; color:#5b4636; cursor:pointer; font-weight:bold;">S</button>
+            <button onclick="setTema('dark')" style="background:#1a1a1a; color:white; border:none; border-radius:5px; padding:8px; cursor:pointer; font-weight:bold;">N</button>
+            <button onclick="setTema('light')" style="background:#ffffff; border:1px solid #ddd; border-radius:5px; padding:8px; color:#000; cursor:pointer; font-weight:bold;">C</button>
         </div>
         <div id="reader-text" class="reader-content"></div>
+        <div id="reader-footer-ctrl" class="reader-footer"></div>
     </div>
 
+    <div id="search-overlay" onclick="fecharBusca()">
+        <div class="search-card" onclick="event.stopPropagation()">
+            <div class="search-left-side">
+                <span style="font-size: 0.7rem; color: #999; margin-bottom: 10px;">PESQUISANDO POR</span>
+                <div id="search-term-display">PALAVRA</div>
+            </div>
+            <div class="search-results-side">
+                <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <small id="search-info-count" style="color:#999; font-weight:bold;"></small>
+                    <button onclick="fecharBusca()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#999;">✕</button>
+                </div>
+                <div id="search-results" class="search-scroll-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Criado e Desenvolvido por <b>Sidiny Junior</b><br>
+        Copyright © 2026 - Todos os Direitos Reservados
+    </footer>
+
     <script>
+        
         const BIBLE_DATA = [
             {n: "Gênesis", c: 50, cat: "Pentateuco", t: "vt", col: "#d35400"},
             {n: "Êxodo", c: 40, cat: "Pentateuco", t: "vt", col: "#d35400"},
@@ -180,10 +425,26 @@
             {n: "Apocalipse", c: 22, cat: "Revelação", t: "nt", col: "#FFAE00"}
         ];
 
+
+                // Função para verificar se deve mostrar o banner imediatamente
+window.addEventListener('load', () => {
+    // Se não estiver instalado e for um navegador que suporta PWA
+    if (!window.matchMedia('(display-mode: standalone)').matches) {
+        setTimeout(() => {
+            const banner = document.getElementById('install-banner');
+            if (banner) banner.style.display = 'flex';
+        }, 2000); // Aparece 2 segundos após abrir o link
+    }
+});
+
         let testamentoAtual = 'vt';
         let contexto = { livro: "", cap: 1, versao: "acf" };
         const BIBLE_CACHE = {};
-        const limparTexto = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        let fontSize = 1.2;
+        let sintetizador = window.speechSynthesis;
+        let statusVoz = 'parado';
+        let ut = null;
+        let versoSelecionadoIdx = null;
 
         function renderBiblia(filtro = "") {
             const container = document.getElementById('lista-livros');
@@ -204,7 +465,7 @@
                 btn.className = "btn-livro";
                 btn.style.backgroundColor = book.col;
                 btn.innerText = book.n;
-                btn.onclick = () => toggleCapitulos(book.n, book.c, btn);
+                btn.onclick = function() { toggleCapitulos(book.n, book.c, this); };
                 const grid = document.createElement('div');
                 grid.className = "capitulos-grid";
                 container.appendChild(btn);
@@ -214,19 +475,21 @@
 
         function toggleCapitulos(livro, total, btn) {
             const grid = btn.nextElementSibling;
-            const visivel = grid.style.display === "grid";
+            const isVisible = grid.style.display === "grid";
             document.querySelectorAll('.capitulos-grid').forEach(g => g.style.display = 'none');
-            if (!visivel) {
+            
+            if (!isVisible) {
                 grid.innerHTML = "";
-                const wrapper = document.createElement('div');
-                wrapper.className = "search-wrapper-local";
-                wrapper.innerHTML = `
-                    <div class="inner-search-container">
-                        <input type="text" class="inner-search-input" placeholder="Buscar em ${livro}..." onkeyup="executarBuscaLocal(this, '${livro}')">
-                    </div>
-                    <div class="local-search-results"></div>
+                const innerSearch = document.createElement('div');
+                innerSearch.className = 'inner-search-container';
+                innerSearch.innerHTML = `
+                    <input type="text" class="inner-search-input" 
+                           placeholder="Buscar em ${livro}..." 
+                           onkeyup="executarBuscaLocal(this, '${livro}')">
+                    <div class="local-search-results" id="local-results-${livro}"></div>
                 `;
-                grid.appendChild(wrapper);
+                grid.appendChild(innerSearch);
+
                 for (let i = 1; i <= total; i++) {
                     const btnCap = document.createElement('div');
                     btnCap.className = 'btn-cap';
@@ -238,75 +501,427 @@
             }
         }
 
-        async function fetchBibleData(v) {
-            if (BIBLE_CACHE[v]) return BIBLE_CACHE[v];
-            const res = await fetch(`https://raw.githubusercontent.com/sidinyjunior/projeto.app.biblia.sagrada/main/${v}.json`);
+        async function fetchBibleData(versao) {
+            if (BIBLE_CACHE[versao]) return BIBLE_CACHE[versao];
+            const url = `https://raw.githubusercontent.com/sidinyjunior/projeto.app.biblia.sagrada/main/${versao}.json`;
+            const res = await fetch(url);
             const data = await res.json();
-            BIBLE_CACHE[v] = data;
+            BIBLE_CACHE[versao] = data;
             return data;
-        }
-
-        function irParaVersiculo(livro, cap, versoIdx) {
-            window.versoParaDestacar = versoIdx - 1;
-            abrirLeitor(livro, cap);
         }
 
         async function abrirLeitor(livro, cap) {
             contexto.livro = livro; contexto.cap = cap;
             document.getElementById('reader-overlay').style.display = 'flex';
-            const cont = document.getElementById('reader-text');
-            cont.innerHTML = "Carregando...";
-            const data = await fetchBibleData(contexto.versao);
-            let lista = Array.isArray(data) ? data : (data.livros || data.capitulos);
-            const lData = lista.find(l => limparTexto(l.nome || l.name) === limparTexto(livro));
-            const versos = (lData.chapters || lData.capitulos)[cap - 1];
-            
-            document.getElementById('reader-title').innerText = `${livro} ${cap}`;
-            cont.innerHTML = versos.map((v, i) => {
-                let cl = (window.versoParaDestacar === i) ? 'highlight-busca' : '';
-                return `<div id="verso-${i}" class="verse-row ${cl}">${i+1} ${v}</div>`;
-            }).join('');
+            carregarTexto();
+        }
 
-            if (window.versoParaDestacar !== undefined) {
-                setTimeout(() => {
-                    const el = document.getElementById(`verso-${window.versoParaDestacar}`);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    window.versoParaDestacar = undefined;
-                }, 300);
+        const limparTexto = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+        async function carregarTexto() {
+            const cont = document.getElementById('reader-text');
+            cont.innerHTML = "<p style='text-align:center; color:#888;'>Carregando escrituras...</p>";
+            try {
+                const data = await fetchBibleData(contexto.versao);
+                let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+                const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(contexto.livro));
+                const capítulos = lData.chapters || lData.capitulos;
+                const versos = capítulos[contexto.cap - 1];
+                
+                document.getElementById('reader-title').innerText = `${contexto.livro} ${contexto.cap}`;
+
+                cont.innerHTML = versos.map((v, i) => {
+                    const corSalva = localStorage.getItem(`mark_${contexto.livro}_${contexto.cap}_${i}`);
+                    const classeCor = corSalva ? `mark-${corSalva}` : '';
+                    return `<div class="verse-row ${classeCor}" onclick="compararVerso(${i})">
+                                <span class="verse-num">${i+1}</span>${v}
+                            </div>`;
+                }).join('');
+
+                cont.scrollTop = 0;
+                renderBotoesNavegacao();
+            } catch (e) { console.error(e); cont.innerHTML = "Erro ao carregar texto."; }
+        }
+
+        function renderBotoesNavegacao() {
+            const footer = document.getElementById('reader-footer-ctrl');
+            footer.innerHTML = "";
+            const livroData = BIBLE_DATA.find(l => l.n === contexto.livro);
+            const btnPrev = document.createElement('button');
+            btnPrev.className = "btn-nav-leitor btn-side";
+            btnPrev.innerText = "❮";
+            btnPrev.onclick = () => mudarCapitulo(-1);
+            if (contexto.cap === 1) btnPrev.style.opacity = "0.3";
+            footer.appendChild(btnPrev);
+
+            const btnOk = document.createElement('button');
+            btnOk.className = "btn-nav-leitor btn-expand";
+            btnOk.innerText = "FECHAR LEITOR";
+            btnOk.onclick = fecharLeitor;
+            footer.appendChild(btnOk);
+
+            const btnNext = document.createElement('button');
+            btnNext.className = "btn-nav-leitor btn-side";
+            btnNext.innerText = "❯";
+            btnNext.onclick = () => mudarCapitulo(1);
+            if (contexto.cap === livroData.c) btnNext.style.opacity = "0.3";
+            footer.appendChild(btnNext);
+        }
+
+        function mudarCapitulo(dir) {
+            const livroData = BIBLE_DATA.find(l => l.n === contexto.livro);
+            let novoCap = contexto.cap + dir;
+            if (novoCap >= 1 && novoCap <= livroData.c) {
+                contexto.cap = novoCap;
+                carregarTexto();
             }
         }
 
-        async function executarBuscaLocal(input, nomeLivro) {
-            const termo = input.value.trim().toLowerCase();
-            const container = input.parentElement.nextElementSibling;
-            if (termo.length < 2) { container.style.display = "none"; return; }
-            const data = await fetchBibleData(contexto.versao);
-            let lista = Array.isArray(data) ? data : (data.livros || data.capitulos);
-            const lData = lista.find(l => limparTexto(l.nome || l.name) === limparTexto(nomeLivro));
-            const caps = lData.chapters || lData.capitulos;
-            let res = [];
-            const regex = (termo.length <= 3) ? new RegExp(`\\b${termo}\\b`, 'gi') : new RegExp(`${termo}`, 'gi');
-            
-            caps.forEach((vv, cIdx) => {
-                vv.forEach((txt, vIdx) => {
-                    if (regex.test(limparTexto(txt))) res.push({c: cIdx+1, v: vIdx+1, t: txt});
-                });
-            });
-            container.style.display = "block";
-            container.innerHTML = res.map(r => `<div class="local-search-item" onclick="irParaVersiculo('${nomeLivro}', ${r.c}, ${r.v})"><b>${r.c}:${r.v}</b> - ${r.t}</div>`).join('');
+        async function compararVerso(idx) {
+            versoSelecionadoIdx = idx;
+            document.getElementById('confirm-overlay').style.display = 'block';
+            document.getElementById('compare-modal').style.display = 'block';
+            document.getElementById('compare-ref').innerText = `${contexto.livro} ${contexto.cap}:${idx+1}`;
+            let html = "";
+            for(let v of ['acf', 'nvi', 'kja', 'kjv']) {
+                try {
+                    const data = await fetchBibleData(v);
+                    let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+                    const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(contexto.livro));
+                    const txt = (lData.chapters || lData.capitulos)[contexto.cap-1][idx];
+                    html += `<div class="compare-item"><span class="compare-label">${v.toUpperCase()}</span><p>${txt}</p></div>`;
+                } catch(e){}
+            }
+            document.getElementById('compare-list').innerHTML = html;
         }
 
-        function fecharLeitor() { document.getElementById('reader-overlay').style.display = 'none'; }
-        function switchTestamento(t) { testamentoAtual = t; renderBiblia(); }
-        function filtrarLivros() { renderBiblia(document.getElementById('bibliaSearch').value); }
+        function compartilharVersiculo() {
+            const ref = document.getElementById('compare-ref').innerText;
+            const primeiroP = document.getElementById('compare-list').querySelector('p');
+            if (!primeiroP) return;
+            const mensagem = `📖 ${ref}\n\n"${primeiroP.innerText}"\n\nEnviado pelo App Bíblia Sagrada`;
+            if (navigator.share) navigator.share({ title: ref, text: mensagem });
+            else { navigator.clipboard.writeText(mensagem); alert("Texto copiado!"); }
+        }
 
-        // PWA LOGIC
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').style.display = 'flex'; });
-        document.getElementById('btn-install-now')?.addEventListener('click', () => { if(deferredPrompt) deferredPrompt.prompt(); });
-        document.getElementById('btn-not-now')?.addEventListener('click', () => { document.getElementById('install-banner').style.display = 'none'; });
+        function marcarVersiculo(cor) {
+            const chave = `mark_${contexto.livro}_${contexto.cap}_${versoSelecionadoIdx}`;
+            if (cor === 'none') localStorage.removeItem(chave);
+            else localStorage.setItem(chave, cor);
+            fecharComparacao();
+            carregarTexto();
+        }
 
+        function fecharComparacao() {
+            document.getElementById('confirm-overlay').style.display = 'none';
+            document.getElementById('compare-modal').style.display = 'none';
+        }
+
+        function fecharLeitor() { document.getElementById('reader-overlay').style.display = 'none'; pararVoz(); }
+        function trocarVersao(v) { contexto.versao = v; carregarTexto(); }
+        function mudarFonte(d) { fontSize += d; document.getElementById('reader-text').style.fontSize = fontSize + "rem"; }
+        function setTema(t) { 
+            const el = document.getElementById('reader-overlay');
+            el.classList.remove('theme-sepia', 'theme-dark');
+            if(t !== 'light') el.classList.add('theme-' + t);
+        }
+
+        function alternarVoz() {
+            const btn = document.getElementById('btn-voz');
+            if (statusVoz === 'lendo') { sintetizador.pause(); statusVoz = 'pausado'; btn.innerText = "▶️"; return; }
+            if (statusVoz === 'pausado') { sintetizador.resume(); statusVoz = 'lendo'; btn.innerText = "⏸️"; return; }
+            if (statusVoz === 'parado') {
+                let texto = document.getElementById('reader-text').innerText.replace(/[0-9]/g, '');
+                ut = new SpeechSynthesisUtterance(texto);
+                ut.lang = 'pt-BR';
+                ut.onstart = () => { statusVoz = 'lendo'; btn.innerText = "⏸️"; };
+                ut.onend = () => { pararVoz(); };
+                sintetizador.speak(ut);
+            }
+        }
+
+        function pararVoz() { sintetizador.cancel(); statusVoz = 'parado'; if (document.getElementById('btn-voz')) document.getElementById('btn-voz').innerText = "▶️"; }
+        function switchTestamento(t) { testamentoAtual = t; document.querySelectorAll('.btn-testamento').forEach(b => b.classList.remove('active')); document.getElementById('tab-' + t).classList.add('active'); renderBiblia(); }
+        function filtrarLivros() {
+    const termo = document.getElementById('bibliaSearch').value;
+    renderBiblia(termo);
+    // Se estiver pesquisando, as categorias somem para focar no resultado
+}
         window.onload = () => { renderBiblia(); };
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js').then(reg => {
+            reg.onupdatefound = () => {
+              const installingWorker = reg.installing;
+              installingWorker.onstatechange = () => { if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) window.location.reload(); };
+            };
+          });
+        }
+
+        /* --- LOGICA BUSCA GLOBAL CARD DUPLO --- */
+        function fecharBusca() { document.getElementById('search-overlay').style.display = 'none'; }
+        document.getElementById('bibliaSearch').addEventListener('keypress', (e) => { if (e.key === 'Enter') executarBuscaGlobal(e.target.value); });
+
+        
+        async function executarBuscaGlobal(termo) {
+    if (termo.length < 2) { alert("Digite pelo menos 2 letras."); return; }
+    const overlay = document.getElementById('search-overlay');
+    const container = document.getElementById('search-results');
+    const termDisplay = document.getElementById('search-term-display');
+    const countDisplay = document.getElementById('search-info-count');
+
+    overlay.style.display = 'flex';
+    termDisplay.innerText = termo;
+    container.innerHTML = "<p style='text-align:center; padding:20px; color:#999;'>🔍 Buscando...</p>";
+    countDisplay.innerText = "Buscando...";
+
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        let resultados = [];
+        const termoNormalizado = limparTexto(termo.trim());
+
+        // LÓGICA DE PALAVRA EXATA PARA 2 OU 3 LETRAS
+        const regexBusca = (termoNormalizado.length <= 3) 
+            ? new RegExp(`\\b${termoNormalizado}\\b`, 'gi') 
+            : new RegExp(`${termoNormalizado}`, 'gi');
+
+        listaLivros.forEach(livro => {
+            const nomeLivro = livro.nome || livro.name;
+            const caps = livro.chapters || livro.capitulos;
+            caps.forEach((versos, cIdx) => {
+                versos.forEach((vTexto, vIdx) => {
+                    const textoNormalizado = limparTexto(vTexto);
+                    // Testa se a palavra bate com a regra da RegExp
+                    if (regexBusca.test(textoNormalizado)) {
+                        resultados.push({ livro: nomeLivro, cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
+                    }
+                });
+            });
+        });
+
+        countDisplay.innerText = `${resultados.length} encontrados`;
+        if (resultados.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px;'>Nenhum resultado exato encontrado.</p>";
+        } else {
+            const regexHighlight = new RegExp(`(${termo})`, 'gi');
+            container.innerHTML = resultados.map(r => {
+                return `<div class="search-item-box" onclick="irParaVersiculo('${r.livro}', ${r.cap})">
+                            <span class="search-item-ref">${r.livro} ${r.cap}:${r.verso}</span>
+                            <div class="search-item-text">${r.texto.replace(regexHighlight, "<b>$1</b>")}</div>
+                        </div>`;
+            }).join('');
+        }
+    } catch (e) { container.innerHTML = "Erro ao buscar."; }
+}
+
+  
+        function irParaVersiculo(livro, cap) { fecharBusca(); abrirLeitor(livro, cap); }
+
+    async function executarBuscaLocal(input, nomeLivro) {
+    const termo = input.value.trim();
+    const termoLimpo = limparTexto(termo);
+    const container = input.nextElementSibling;
+    
+    if (termoLimpo.length < 2) { container.style.display = "none"; return; }
+    
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(nomeLivro));
+        const capitulos = lData.chapters || lData.capitulos;
+        let encontrados = [];
+
+        // Criamos uma regra: se a palavra tiver 2 ou 3 letras, buscamos apenas a palavra exata
+        // O \b garante que não pegue partes de outras palavras
+        const regexBusca = (termoLimpo.length <= 3) 
+            ? new RegExp(`\\b${termoLimpo}\\b`, 'gi') 
+            : new RegExp(`${termoLimpo}`, 'gi');
+
+        capitulos.forEach((versos, cIdx) => {
+            versos.forEach((vTexto, vIdx) => {
+                const textoNormalizado = limparTexto(vTexto);
+                if (regexBusca.test(textoNormalizado)) {
+                    encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
+                }
+            });
+        });
+
+        if (encontrados.length > 0) {
+            container.style.display = "block";
+            const regexHighlight = new RegExp(`(${termo})`, 'gi');
+            container.innerHTML = encontrados.map(e => `
+                <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
+                    <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regexHighlight, "<b>$1</b>")}
+                </div>`).join('');
+        } else { 
+            container.style.display = "block"; 
+            container.innerHTML = "<div style='padding:10px;'>Nada encontrado com essa palavra exata.</div>"; 
+        }
+    } catch (e) { console.error(e); }
+}
+
+       
+        function limparBuscaPrincipal() {
+            const input = document.getElementById('bibliaSearch');
+            input.value = ''; // Apaga o que foi digitado
+            filtrarLivros();  // Volta a mostrar todos os livros na lista
+            input.focus();    // Deixa o cursor piscando no campo pronto para digitar de novo
+        }
+
+        let deferredPrompt;
+
+// 1. Escuta o navegador perguntando se pode instalar
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Impede o navegador de mostrar o prompt padrão feio
+    e.preventDefault();
+    // Guarda o evento para usar depois
+    deferredPrompt = e;
+    // Mostra o SEU banner bonito
+    const banner = document.getElementById('install-banner');
+    if (banner) {
+        banner.style.display = 'flex';
+    }
+});
+
+// 2. Ação do Botão "INSTALAR"
+document.getElementById('btn-install-now').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Mostra a caixa de confirmação oficial do navegador
+        deferredPrompt.prompt();
+        // Espera a escolha do usuário
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Usuário escolheu: ${outcome}`);
+        // Limpa o evento pois ele só pode ser usado uma vez
+        deferredPrompt = null;
+        // Esconde o banner
+        document.getElementById('install-banner').style.display = 'none';
+    }
+});
+
+// 3. Ação do Botão "AGORA NÃO"
+document.getElementById('btn-not-now').addEventListener('click', () => {
+    document.getElementById('install-banner').style.display = 'none';
+});
+
+        // 4. Lógica de Instalação e Identificação do Usuário (Gran Finale)
+        function formatarNome(nomeCompleto) {
+            const partes = nomeCompleto.trim().split(/\s+/); 
+            if (partes.length === 0) return "";
+            const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+            const p = cap(partes[0]);
+            return partes.length > 1 ? `${p} ${cap(partes[1])}` : p;
+        }
+
+      // Função para salvar nome e gênero
+function salvarNomeUsuario() {
+    const input = document.getElementById('userNameInput');
+    const generoSelecionado = document.querySelector('input[name="userGender"]:checked').value;
+
+    if (input.value.trim().length < 3) {
+        alert("Por favor, digite seu nome e sobrenome.");
+        return;
+    }
+
+    const nomeFinal = formatarNome(input.value);
+    
+    // Salva os dois dados no localStorage
+    localStorage.setItem('stilli_user_name', nomeFinal);
+    localStorage.setItem('stilli_user_gender', generoSelecionado);
+    
+    document.getElementById('welcome-overlay').style.display = 'none';
+    exibirSaudacao(nomeFinal, generoSelecionado);
+}
+
+// Função para exibir a saudação personalizada
+function exibirSaudacao(nome, genero) {
+    const div = document.getElementById('saudacao-usuario');
+    const bemVindo = (genero === 'F') ? 'bem-vinda' : 'bem-vindo';
+    
+    div.innerHTML = `Olá, <b>${nome}</b>, seja ${bemVindo}!!!`;
+    div.style.display = 'block';
+}
+
+// Ajuste na verificação inicial
+window.addEventListener('load', () => {
+    const nomeSalvo = localStorage.getItem('stilli_user_name');
+    const generoSalvo = localStorage.getItem('stilli_user_gender');
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (nomeSalvo) {
+        // Agora passa o gênero salvo também
+        exibirSaudacao(nomeSalvo, generoSalvo || 'M'); 
+    } 
+    else if (isInstalled) {
+        document.getElementById('welcome-overlay').style.display = 'flex';
+    }
+
+   let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+
+// Captura o evento de instalação do navegador
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Impede o prompt padrão automático
+    e.preventDefault();
+    // Armazena o evento para ser disparado pelo nosso botão
+    deferredPrompt = e;
+    // Mostra o seu banner personalizado
+    if (installBanner) {
+        installBanner.style.display = 'flex';
+    }
+});
+
+// Ação do Botão "INSTALAR AGORA"
+document.getElementById('btn-install-now').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Dispara o prompt nativo de instalação diretamente
+        deferredPrompt.prompt();
+        
+        // Verifica a escolha do usuário
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('Usuário aceitou a instalação');
+        }
+        
+        // Limpa o prompt para não ser usado novamente
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+    } else {
+        // Caso o evento ainda não tenha sido disparado pelo navegador
+        console.log('O prompt de instalação ainda não está pronto.');
+    }
+});
+
+// Ação do Botão "AGORA NÃO"
+document.getElementById('btn-not-now').addEventListener('click', () => {
+    installBanner.style.display = 'none';
+});
+
+// Esconde o banner se a instalação for concluída com sucesso
+window.addEventListener('appinstalled', () => {
+    installBanner.style.display = 'none';
+    deferredPrompt = null;
+});
+    
+            document.getElementById('btn-not-now').addEventListener('click', () => {
+                installBanner.style.display = 'none';
+            });
+            
+            // Esconde o banner se a instalação for concluída
+            window.addEventListener('appinstalled', () => {
+                installBanner.style.display = 'none';
+                console.log('PWA instalado com sucesso!');
+            });
+        });
+
     </script>
 </body>
 </html>
+
+
+
+  
+
+
+        
+  
