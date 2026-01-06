@@ -950,16 +950,6 @@ window.addEventListener('appinstalled', () => {
                 installBanner.style.display = 'none';
             });
 
-      // Ativa o aviso permanente
-                    msgArea.innerHTML = "🚀 AGUARDE... INSTALANDO NO SEU CELULAR";
-                    msgArea.className = "installing-active";
-                    if (btnArea) btnArea.style.display = 'none';
-                } else {
-                    installBanner.style.display = 'none';
-                }
-                window.deferredPrompt = null;
-            }
-            
             // Esconde o banner se a instalação for concluída
             window.addEventListener('appinstalled', () => {
                 installBanner.style.display = 'none';
