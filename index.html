@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- V46 -->
+    <!-- V47 -->
     <link href="https://fonts.googleapis.com/css2?family=Advent+Pro:wght@600&family=Great+Vibes&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
     <title>Projeto Stille Holy Bible</title>
     
@@ -258,6 +258,15 @@
 .installing-text {
     animation: pulse 1.5s infinite;
     font-weight: 800;
+}
+
+.installing-active {
+    color: #2ecc71 !important;
+    font-weight: 800 !important;
+    animation: pulse 1.5s infinite;
+    display: block;
+    text-align: center;
+    width: 100%;
 }
         
     </style>
@@ -834,36 +843,33 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
 });
 
-// Ação do Botão "INSTALAR AGORA"
 document.getElementById('btn-install-now').addEventListener('click', async () => {
-    if (deferredPrompt) {
-        // Dispara o prompt original do navegador
-        deferredPrompt.prompt();
+    if (window.deferredPrompt) {
+        // 1. Mostra a caixa do sistema (Android/Windows)
+        window.deferredPrompt.prompt();
         
-        // Aguarda a escolha do usuário
-        const { outcome } = await deferredPrompt.userChoice;
+        // 2. Captura a decisão IMEDIATAMENTE
+        const { outcome } = await window.deferredPrompt.userChoice;
         
         if (outcome === 'accepted') {
+            // 🎯 MUDANÇA VISUAL IMEDIATA
             const banner = document.getElementById('install-banner');
-            const msgArea = banner.querySelector('span');
-            const btnArea = banner.querySelector('.banner-buttons');
+            const msgSpan = banner.querySelector('span');
+            const botoes = banner.querySelector('.banner-buttons');
 
-            // 1. Muda o texto da mensagem
-            msgArea.innerHTML = "🚀 Instalando Bíblia Sagrada... aguarde.";
+            // Troca o texto e aplica a classe de piscar
+            msgSpan.innerHTML = "🚀 AGUARDE... INSTALANDO NO SEU CELULAR";
+            msgSpan.className = "installing-active";
+
+            // Some com os botões para o banner ficar limpo só com a mensagem
+            if (botoes) botoes.style.display = 'none';
             
-            // 2. ADICIONA A CLASSE que cria a animação de piscar
-            msgArea.className = "installing-text";
-
-            // 3. Esconde os botões para não haver duplo clique
-            if (btnArea) btnArea.style.display = 'none';
-
-            console.log('Instalação aceita. Aguardando sinal do sistema...');
+            console.log('Usuário aceitou. Aviso "Instalando" ativado.');
         } else {
-            // Se o usuário recusar no prompt do Android/iOS, fecha o banner
+            // Se ele recusou, o banner some
             document.getElementById('install-banner').style.display = 'none';
         }
-        
-        deferredPrompt = null;
+        window.deferredPrompt = null;
     }
 });
 
@@ -955,9 +961,10 @@ window.addEventListener('load', () => {
     });
 
     window.addEventListener('appinstalled', () => {
-        if (installBanner) installBanner.style.display = 'none';
-        console.log('App instalado com sucesso!');
-    });
+    // Só fecha o banner aqui, quando o Android confirmar que o ícone foi criado
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.style.display = 'none';
+    alert("Instalação Concluída! Busque o ícone do Leão nos seus aplicativos.");
 });
 
     </script>
