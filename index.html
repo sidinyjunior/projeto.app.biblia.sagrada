@@ -856,39 +856,48 @@ window.addEventListener('load', () => {
         document.getElementById('welcome-overlay').style.display = 'flex';
     }
 
-    let deferredPrompt;
+   let deferredPrompt;
 const installBanner = document.getElementById('install-banner');
 
-// 1. Escuta o navegador perguntando se pode instalar
+// Captura o evento de instalação do navegador
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Impede o prompt padrão
+    // Impede o prompt padrão automático
     e.preventDefault();
-    // Guarda o evento
+    // Armazena o evento para ser disparado pelo nosso botão
     deferredPrompt = e;
-    // Mostra o banner
-    if (installBanner) installBanner.style.display = 'flex';
-    console.log("Evento PWA capturado e pronto.");
-});
-
-// 2. Ação do Botão "INSTALAR AGORA"
-document.getElementById('btn-install-now').addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`Usuário escolheu: ${outcome}`);
-        deferredPrompt = null;
-        installBanner.style.display = 'none';
-    } else {
-        alert("Para instalar, use a opção 'Adicionar à tela de início' no menu do seu navegador.");
+    // Mostra o seu banner personalizado
+    if (installBanner) {
+        installBanner.style.display = 'flex';
     }
 });
 
-// 3. Ação do Botão "AGORA NÃO"
+// Ação do Botão "INSTALAR AGORA"
+document.getElementById('btn-install-now').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Dispara o prompt nativo de instalação diretamente
+        deferredPrompt.prompt();
+        
+        // Verifica a escolha do usuário
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('Usuário aceitou a instalação');
+        }
+        
+        // Limpa o prompt para não ser usado novamente
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+    } else {
+        // Caso o evento ainda não tenha sido disparado pelo navegador
+        console.log('O prompt de instalação ainda não está pronto.');
+    }
+});
+
+// Ação do Botão "AGORA NÃO"
 document.getElementById('btn-not-now').addEventListener('click', () => {
     installBanner.style.display = 'none';
 });
 
-// Esconde o banner se a instalação for concluída por fora
+// Esconde o banner se a instalação for concluída com sucesso
 window.addEventListener('appinstalled', () => {
     installBanner.style.display = 'none';
     deferredPrompt = null;
