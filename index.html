@@ -108,19 +108,17 @@
         .search-item-text b { color: #000; background: var(--amarelo); padding: 0 2px; }
 
 .local-search-results {
-    display: none; /* Mantém escondido até pesquisar */
+    grid-column: 1 / -1 !important; /* Força ocupar da coluna 1 até a última */
     width: 100% !important;
-    grid-column: 1 / span 5 !important; /* Força ocupar as 5 colunas */
-    float: left; /* Ajuda a quebrar a rigidez do grid */
-    clear: both;
     background: rgba(242, 147, 37, 0.15);
     border-radius: 10px;
     padding: 15px;
     margin-top: 10px;
     max-height: 250px;
     overflow-y: auto;
+    display: none;
     border: 1px dashed var(--primary);
-    box-sizing: border-box;
+    box-sizing: border-box; /* Importante para o padding não empurrar a borda */
 }
         .local-search-item { padding: 10px; border-bottom: 1px solid #444; font-size: 0.85rem; color: #ccc; cursor: pointer; text-align: left; }
         .local-search-item b { color: var(--amarelo); }
@@ -710,34 +708,48 @@ window.addEventListener('load', () => {
 
         function irParaVersiculo(livro, cap) { fecharBusca(); abrirLeitor(livro, cap); }
 
-        async function executarBuscaLocal(input, nomeLivro) {
-            const termo = input.value.trim();
-            const termoLimpo = limparTexto(termo);
-            const container = input.nextElementSibling;
-            if (termoLimpo.length < 2) { container.style.display = "none"; return; }
-            try {
-                const data = await fetchBibleData(contexto.versao);
-                let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
-                const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(nomeLivro));
-                const capitulos = lData.chapters || lData.capitulos;
-                let encontrados = [];
-                capitulos.forEach((versos, cIdx) => {
-                    versos.forEach((vTexto, vIdx) => {
-                        if (limparTexto(vTexto).includes(termoLimpo)) {
-                            encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
-                        }
-                    });
-                });
-                if (encontrados.length > 0) {
-                    container.style.display = "block";
-                    const regex = new RegExp(`(${termo})`, 'gi');
-                    container.innerHTML = encontrados.map(e => `
-                        <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
-                            <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regex, "<b>$1</b>")}
-                        </div>`).join('');
-                } else { container.style.display = "block"; container.innerHTML = "<div style='padding:10px;'>Nada encontrado.</div>"; }
-            } catch (e) { console.error(e); }
+    async function executarBuscaLocal(input, nomeLivro) {
+    const termo = input.value.trim();
+    const termoLimpo = limparTexto(termo);
+    const container = input.nextElementSibling;
+    
+    if (termoLimpo.length < 2) { container.style.display = "none"; return; }
+    
+    try {
+        const data = await fetchBibleData(contexto.versao);
+        let listaLivros = Array.isArray(data) ? data : (data.livros || data.capitulos);
+        const lData = listaLivros.find(l => limparTexto(l.nome || l.name || "") === limparTexto(nomeLivro));
+        const capitulos = lData.chapters || lData.capitulos;
+        let encontrados = [];
+
+        // Criamos uma regra: se a palavra tiver 2 ou 3 letras, buscamos apenas a palavra exata
+        // O \b garante que não pegue partes de outras palavras
+        const regexBusca = (termoLimpo.length <= 3) 
+            ? new RegExp(`\\b${termoLimpo}\\b`, 'gi') 
+            : new RegExp(`${termoLimpo}`, 'gi');
+
+        capitulos.forEach((versos, cIdx) => {
+            versos.forEach((vTexto, vIdx) => {
+                const textoNormalizado = limparTexto(vTexto);
+                if (regexBusca.test(textoNormalizado)) {
+                    encontrados.push({ cap: cIdx + 1, verso: vIdx + 1, texto: vTexto });
+                }
+            });
+        });
+
+        if (encontrados.length > 0) {
+            container.style.display = "block";
+            const regexHighlight = new RegExp(`(${termo})`, 'gi');
+            container.innerHTML = encontrados.map(e => `
+                <div class="local-search-item" onclick="abrirLeitor('${nomeLivro}', ${e.cap})">
+                    <strong style="color:var(--primary)">${e.cap}:${e.verso}</strong> - ${e.texto.replace(regexHighlight, "<b>$1</b>")}
+                </div>`).join('');
+        } else { 
+            container.style.display = "block"; 
+            container.innerHTML = "<div style='padding:10px;'>Nada encontrado com essa palavra exata.</div>"; 
         }
+    } catch (e) { console.error(e); }
+}
 
        
         function limparBuscaPrincipal() {
